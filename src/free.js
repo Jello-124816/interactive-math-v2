@@ -2,222 +2,64 @@
 import './style.css';
 import './free.css';
 
-const base = import.meta.env.BASE_URL;
+import {
+  freeCourses,
+  interactiveTopics,
+  satCategories,
+  satPractices
+} from './data/library-data.js';
 
-/* =========================================
-   FREE COURSES
-   ========================================= */
+import { renderFreeLayout } from './components/free-layout.js';
+import { createCard } from './components/course-card.js';
+import { renderSatPractice } from './components/sat-practice.js';
+import { renderSatQuestionPage } from './components/sat-question-page.js';
 
-const freeCourses = [
-  {
-    id: 'algebra',
-    title: 'Algebra',
-    category: 'Free Course',
-    description:
-      'Explore equations, functions, and graphs through interactive mathematics.',
-    icon: '📈'
-  },
-  {
-    id: 'geometry',
-    title: 'Geometry',
-    category: 'Free Course',
-    description:
-      'Explore shapes, measurements, and geometric relationships through interactive diagrams.',
-    icon: '📐'
-  }
-];
-
-/* =========================================
-   FREE INTERACTIVE TOPICS
-   ========================================= */
-
-const interactiveTopics = [
-  {
-    id: 'linear',
-    courseId: 'algebra',
-    title: 'Linear Equations and Their Graphs',
-    category: 'Algebra',
-    description:
-      'Explore slope, y-intercept, and straight-line graphs using adjustable sliders.',
-    icon: '📈',
-    url: `${base}linear.html`
-  },
-  {
-    id: 'pythagorean',
-    courseId: 'geometry',
-    title: 'Pythagorean Theorem',
-    category: 'Geometry',
-    description:
-      'Adjust the sides of a right triangle and explore the squares constructed on each side.',
-    icon: '📐',
-    url: `${base}pythagorean.html`
-  }
-];
-
-/* =========================================
-   PAGE STRUCTURE
-   ========================================= */
-
-const app = document.querySelector('#app');
-
-app.innerHTML = `
-  <header class="site-header">
-    <div class="container header-inner">
-      <a href="${base}" class="brand">
-        <span class="logo-placeholder">∑</span>
-        <span class="brand-name">Interactive Mathematics</span>
-      </a>
-
-      <nav class="header-nav">
-        <a href="${base}">Home</a>
-        <a href="${base}free.html" aria-current="page">Free</a>
-        <a href="${base}premium.html">Premium</a>
-      </nav>
-    </div>
-  </header>
-
-  <main class="library-page container">
-    <a class="back-link" href="${base}">
-      ← Back to Home
-    </a>
-
-    <div class="library-heading">
-      <h1>Free Interactive Mathematics</h1>
-      <p>
-        Discover mathematics through interactive graphs,
-        diagrams, and adjustable values.
-      </p>
-    </div>
-
-    <div class="library-search">
-      <label for="topic-search">
-        Find a mathematics course or topic
-      </label>
-      <input
-        id="topic-search"
-        type="search"
-        placeholder="Search mathematics topics..."
-        autocomplete="off"
-      />
-    </div>
-
-    <button
-      id="library-back"
-      type="button"
-      hidden
-      style="
-        border: 0;
-        background: transparent;
-        color: #2563eb;
-        font: inherit;
-        font-size: 14px;
-        font-weight: 650;
-        padding: 0;
-        margin-bottom: 20px;
-        cursor: pointer;
-      "
-    >
-      ← Back to Courses
-    </button>
-
-    <div class="library-summary">
-      <h2 id="library-title">
-        Explore Free Courses
-      </h2>
-      <span id="topic-count"></span>
-    </div>
-
-    <div id="topic-grid" class="topic-grid"></div>
-
-    <p id="empty-message" class="empty-message" hidden>
-      No matching mathematics content found.
-    </p>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <span>Interactive Mathematics</span>
-      <span>Explore mathematics visually.</span>
-    </div>
-  </footer>
-`;
-
-/* =========================================
-   ELEMENTS AND STATE
-   ========================================= */
+// Build the page before selecting its elements.
+renderFreeLayout();
 
 const searchInput = document.querySelector('#topic-search');
+const searchContainer = document.querySelector('.library-search');
 const topicGrid = document.querySelector('#topic-grid');
 const topicCount = document.querySelector('#topic-count');
 const emptyMessage = document.querySelector('#empty-message');
 const backButton = document.querySelector('#library-back');
 const libraryTitle = document.querySelector('#library-title');
+const practiceView = document.querySelector('#practice-view');
+const librarySummary = document.querySelector('.library-summary');
 
 let currentCourse = null;
+let currentSatCategory = null;
+let currentPractice = null;
+let currentDifficulty = 'easy';
+let currentQuestion = null;
 
-/* =========================================
-   CREATE CARDS
-   ========================================= */
+// -------------------------------------
+// Course and category navigation
+// -------------------------------------
 
-function createCard(item, type) {
-  const card = document.createElement(
-    type === 'course' ? 'button' : 'a'
-  );
-
-  card.className = 'topic-card';
-
+function handleCardNavigation(type, item) {
   if (type === 'course') {
-    card.type = 'button';
-    card.style.textAlign = 'left';
-    card.style.font = 'inherit';
-    card.style.color = 'inherit';
-    card.style.cursor = 'pointer';
-
-    card.addEventListener('click', () => {
-      currentCourse = item.id;
-      searchInput.value = '';
-      renderLibrary();
-    });
-  } else {
-    card.href = item.url;
+    currentCourse = item.id;
+    currentSatCategory = null;
+    currentPractice = null;
+    currentQuestion = null;
+  } else if (type === 'sat-category') {
+    currentSatCategory = item.id;
+    currentPractice = null;
+    currentQuestion = null;
+  } else if (type === 'practice') {
+    currentPractice = item.id;
+    currentDifficulty = 'easy';
+    currentQuestion = null;
   }
 
-  const icon = document.createElement('div');
-  icon.className = 'topic-icon';
-  icon.textContent = item.icon;
-
-  const category = document.createElement('span');
-  category.className = 'topic-category';
-  category.textContent = item.category;
-
-  const title = document.createElement('h3');
-  title.textContent = item.title;
-
-  const description = document.createElement('p');
-  description.textContent = item.description;
-
-  const action = document.createElement('span');
-  action.className = 'topic-action';
-
-  action.textContent =
-    type === 'course'
-      ? `Explore ${item.title} →`
-      : 'Explore Interactive →';
-
-  card.append(
-    icon,
-    category,
-    title,
-    description,
-    action
-  );
-
-  return card;
+  searchInput.value = '';
+  renderLibrary();
 }
 
-/* =========================================
-   SEARCH
-   ========================================= */
+// -------------------------------------
+// Search
+// -------------------------------------
 
 function matchesSearch(item, query) {
   const normalized = query.trim().toLowerCase();
@@ -231,71 +73,228 @@ function matchesSearch(item, query) {
   );
 }
 
-/* =========================================
-   RENDER LIBRARY
-   ========================================= */
+// -------------------------------------
+// Individual SAT question
+// -------------------------------------
+
+function showQuestion(questionId) {
+  const success = renderSatQuestionPage({
+    container: practiceView,
+    questionId,
+    practiceId: currentPractice,
+    difficulty: currentDifficulty
+  });
+
+  if (!success) {
+    return;
+  }
+
+  currentQuestion = questionId;
+
+  topicGrid.hidden = true;
+  librarySummary.hidden = true;
+  searchContainer.hidden = true;
+  emptyMessage.hidden = true;
+  practiceView.hidden = false;
+
+  backButton.hidden = false;
+  backButton.textContent = '← Back to Questions';
+}
+
+// -------------------------------------
+// SAT practice page
+// -------------------------------------
+
+function renderPractice() {
+  const practice = satPractices.find(
+    item => item.id === currentPractice
+  );
+
+  if (!practice) {
+    currentPractice = null;
+    currentQuestion = null;
+    renderLibrary();
+    return;
+  }
+
+  topicGrid.hidden = true;
+  librarySummary.hidden = true;
+  searchContainer.hidden = true;
+  emptyMessage.hidden = true;
+  practiceView.hidden = false;
+
+  backButton.hidden = false;
+
+  if (currentQuestion !== null) {
+    showQuestion(currentQuestion);
+    return;
+  }
+
+  backButton.textContent = '← Back to SAT Algebra';
+
+  renderSatPractice({
+    container: practiceView,
+    practice,
+    initialDifficulty: currentDifficulty,
+
+    onDifficultyChange(difficulty) {
+      currentDifficulty = difficulty;
+    },
+
+    onQuestionSelect(questionId) {
+      showQuestion(questionId);
+    }
+  });
+}
+
+// -------------------------------------
+// Free library
+// -------------------------------------
 
 function renderLibrary() {
+  if (currentPractice !== null) {
+    renderPractice();
+    return;
+  }
+
+  practiceView.hidden = true;
+  topicGrid.hidden = false;
+  librarySummary.hidden = false;
+  searchContainer.hidden = false;
+
   const query = searchInput.value;
 
-  let items;
-  let type;
+  let items = [];
+  let type = 'course';
 
   if (currentCourse === null) {
-    type = 'course';
     items = freeCourses;
+    type = 'course';
 
     libraryTitle.textContent = 'Explore Free Courses';
+
     backButton.hidden = true;
+    backButton.textContent = '← Back to Courses';
+
+  } else if (currentCourse === 'sat-math') {
+    backButton.hidden = false;
+
+    if (currentSatCategory === null) {
+      items = satCategories;
+      type = 'sat-category';
+
+      libraryTitle.textContent = 'SAT Math Practices';
+      backButton.textContent = '← Back to Courses';
+
+    } else {
+      items = satPractices.filter(
+        item => item.categoryId === currentSatCategory
+      );
+
+      type = 'practice';
+
+      const selectedCategory = satCategories.find(
+        item => item.id === currentSatCategory
+      );
+
+      libraryTitle.textContent =
+        selectedCategory?.title || 'SAT Math Practices';
+
+      backButton.textContent =
+        '← Back to SAT Math Practices';
+    }
+
   } else {
+    items = interactiveTopics.filter(
+      item => item.courseId === currentCourse
+    );
+
     type = 'topic';
 
     const course = freeCourses.find(
       item => item.id === currentCourse
     );
 
-    items = interactiveTopics.filter(
-      item => item.courseId === currentCourse
-    );
-
     libraryTitle.textContent =
       `${course?.title || 'Mathematics'} Topics`;
 
     backButton.hidden = false;
+    backButton.textContent = '← Back to Courses';
   }
 
-  const filtered = items.filter(item =>
-    matchesSearch(item, query)
+  const filtered = items.filter(
+    item => matchesSearch(item, query)
   );
 
   topicGrid.replaceChildren(
-    ...filtered.map(item => createCard(item, type))
+    ...filtered.map(item =>
+      createCard(item, type, handleCardNavigation)
+    )
   );
 
+  let countLabel;
+
+  if (type === 'course') {
+    countLabel = filtered.length === 1
+      ? 'course'
+      : 'courses';
+  } else if (type === 'sat-category') {
+    countLabel = filtered.length === 1
+      ? 'category'
+      : 'categories';
+  } else if (type === 'practice') {
+    countLabel = filtered.length === 1
+      ? 'practice'
+      : 'practices';
+  } else {
+    countLabel = filtered.length === 1
+      ? 'interactive visual'
+      : 'interactive visuals';
+  }
+
   topicCount.textContent =
-    `${filtered.length} ${
-      type === 'course'
-        ? filtered.length === 1 ? 'course' : 'courses'
-        : filtered.length === 1 ? 'interactive visual' : 'interactive visuals'
-    }`;
+    `${filtered.length} ${countLabel}`;
 
   emptyMessage.hidden = filtered.length !== 0;
+
+  if (filtered.length === 0 && !query.trim()) {
+    if (type === 'practice') {
+      emptyMessage.textContent =
+        'Practice questions will be added here soon.';
+    } else {
+      emptyMessage.textContent =
+        'No mathematics content has been added yet.';
+    }
+  } else {
+    emptyMessage.textContent =
+      'No matching mathematics content found.';
+  }
 }
 
-/* =========================================
-   EVENTS
-   ========================================= */
+// -------------------------------------
+// Event listeners
+// -------------------------------------
 
 searchInput.addEventListener('input', renderLibrary);
 
 backButton.addEventListener('click', () => {
-  currentCourse = null;
+  if (currentQuestion !== null) {
+    currentQuestion = null;
+  } else if (currentPractice !== null) {
+    currentPractice = null;
+  } else if (
+    currentCourse === 'sat-math' &&
+    currentSatCategory !== null
+  ) {
+    currentSatCategory = null;
+  } else {
+    currentCourse = null;
+    currentSatCategory = null;
+  }
+
   searchInput.value = '';
   renderLibrary();
 });
 
-/* =========================================
-   INITIAL RENDER
-   ========================================= */
-
+// Start the Free Library.
 renderLibrary();

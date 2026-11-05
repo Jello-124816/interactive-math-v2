@@ -1,0 +1,724 @@
+
+import './style.css';
+import './free.css';
+
+import { satQuestions } from './sat-questions.js';
+import { renderSatQuestion } from './sat-question-viewer.js';
+
+const base = import.meta.env.BASE_URL;
+
+const freeCourses = [
+  {
+    id: 'algebra',
+    title: 'Algebra',
+    category: 'Free Course',
+    description:
+      'Explore equations, functions, and graphs through interactive mathematics.',
+    icon: '📈'
+  },
+  {
+    id: 'geometry',
+    title: 'Geometry',
+    category: 'Free Course',
+    description:
+      'Explore shapes, measurements, and geometric relationships through interactive diagrams.',
+    icon: '📐'
+  },
+  {
+    id: 'sat-math',
+    title: 'SAT Math Practices',
+    category: 'Free Course',
+    description:
+      'Practice SAT Math questions across the four Digital SAT mathematics domains.',
+    icon: '📝'
+  }
+];
+
+const interactiveTopics = [
+  {
+    id: 'linear',
+    courseId: 'algebra',
+    title: 'Linear Equations & Functions',
+    category: 'Algebra',
+    description:
+      'Explore linear equations, functions, slope, intercepts, and graphs using interactive visuals.',
+    icon: '📈',
+    url: `${base}linear.html`
+  },
+  {
+    id: 'pythagorean',
+    courseId: 'geometry',
+    title: 'Pythagorean Theorem',
+    category: 'Geometry',
+    description:
+      'Adjust the sides of a right triangle and explore the squares constructed on each side.',
+    icon: '📐',
+    url: `${base}pythagorean.html`
+  }
+];
+
+const satCategories = [
+  {
+    id: 'advanced-math',
+    title: 'Advanced Math (Free)',
+    category: 'SAT Math',
+    description:
+      'Practice nonlinear equations, functions, and equivalent expressions.',
+    icon: '📊'
+  },
+  {
+    id: 'sat-algebra',
+    title: 'Algebra (Free)',
+    category: 'SAT Math',
+    description:
+      'Practice linear equations, inequalities, systems, and linear functions.',
+    icon: '📈'
+  },
+  {
+    id: 'geometry-trigonometry',
+    title: 'Geometry and Trigonometry (Free)',
+    category: 'SAT Math',
+    description:
+      'Practice area, volume, triangles, circles, and trigonometric relationships.',
+    icon: '📐'
+  },
+  {
+    id: 'problem-solving-data',
+    title: 'Problem-Solving and Data Analysis (Free)',
+    category: 'SAT Math',
+    description:
+      'Practice ratios, percentages, probability, statistics, and data interpretation.',
+    icon: '📉'
+  }
+];
+
+const satPractices = [
+  {
+    id: 'sat-linear-equations',
+    categoryId: 'sat-algebra',
+    title: 'Linear Equations & Functions',
+    category: 'SAT Algebra',
+    description:
+      'Practice linear equations, linear functions, slope, intercepts, and graphs.',
+    icon: '📈'
+  }
+];
+
+const app = document.querySelector('#app');
+
+app.innerHTML = `
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="${base}" class="brand">
+        <span class="logo-placeholder">∑</span>
+        <span class="brand-name">Interactive Mathematics</span>
+      </a>
+
+      <nav class="header-nav">
+        <a href="${base}">Home</a>
+        <a href="${base}free.html" aria-current="page">Free</a>
+        <a href="${base}premium.html">Premium</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="library-page container">
+    <a class="back-link" href="${base}">
+      ← Back to Home
+    </a>
+
+    <div class="library-heading">
+      <h1>Free Interactive Mathematics</h1>
+      <p>
+        Discover mathematics through interactive graphs,
+        diagrams, adjustable values, and SAT Math practice.
+      </p>
+    </div>
+
+    <div class="library-search">
+      <label for="topic-search">
+        Find a mathematics course or topic
+      </label>
+      <input
+        id="topic-search"
+        type="search"
+        placeholder="Search mathematics topics..."
+        autocomplete="off"
+      />
+    </div>
+
+    <button
+      id="library-back"
+      type="button"
+      hidden
+      style="
+        border: 0;
+        background: transparent;
+        color: #2563eb;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 650;
+        padding: 0;
+        margin-bottom: 20px;
+        cursor: pointer;
+      "
+    >
+      ← Back to Courses
+    </button>
+
+    <div class="library-summary">
+      <h2 id="library-title">Explore Free Courses</h2>
+      <span id="topic-count"></span>
+    </div>
+
+    <div id="topic-grid" class="topic-grid"></div>
+
+    <section id="practice-view" hidden></section>
+
+    <p id="empty-message" class="empty-message" hidden>
+      No matching mathematics content found.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>Interactive Mathematics</span>
+      <span>Explore mathematics visually.</span>
+    </div>
+  </footer>
+`;
+
+const searchInput = document.querySelector('#topic-search');
+const searchContainer = document.querySelector('.library-search');
+const topicGrid = document.querySelector('#topic-grid');
+const topicCount = document.querySelector('#topic-count');
+const emptyMessage = document.querySelector('#empty-message');
+const backButton = document.querySelector('#library-back');
+const libraryTitle = document.querySelector('#library-title');
+const practiceView = document.querySelector('#practice-view');
+const librarySummary = document.querySelector('.library-summary');
+
+let currentCourse = null;
+let currentSatCategory = null;
+let currentPractice = null;
+let currentDifficulty = 'easy';
+let currentQuestion = null;
+
+function createCard(item, type) {
+  const isLink = Boolean(item.url);
+
+  const isNavigationCard =
+    type === 'course' ||
+    type === 'sat-category' ||
+    type === 'practice';
+
+  const card = document.createElement(
+    isLink ? 'a' : isNavigationCard ? 'button' : 'div'
+  );
+
+  card.className = 'topic-card';
+
+  if (isLink) {
+    card.href = item.url;
+  } else if (isNavigationCard) {
+    card.type = 'button';
+    card.style.textAlign = 'left';
+    card.style.font = 'inherit';
+    card.style.color = 'inherit';
+    card.style.cursor = 'pointer';
+
+    card.addEventListener('click', () => {
+      if (type === 'course') {
+        currentCourse = item.id;
+        currentSatCategory = null;
+        currentPractice = null;
+        currentQuestion = null;
+      } else if (type === 'sat-category') {
+        currentSatCategory = item.id;
+        currentPractice = null;
+        currentQuestion = null;
+      } else if (type === 'practice') {
+        currentPractice = item.id;
+        currentDifficulty = 'easy';
+        currentQuestion = null;
+      }
+
+      searchInput.value = '';
+      renderLibrary();
+    });
+  }
+
+  const icon = document.createElement('div');
+  icon.className = 'topic-icon';
+  icon.textContent = item.icon || '📝';
+
+  const category = document.createElement('span');
+  category.className = 'topic-category';
+  category.textContent = item.category || '';
+
+  const title = document.createElement('h3');
+
+  if (item.title.endsWith('(Free)')) {
+    const mainTitle = document.createTextNode(
+      item.title.replace(/\s*\(Free\)$/, ' ')
+    );
+
+    const freeLabel = document.createElement('span');
+    freeLabel.textContent = '(Free)';
+    freeLabel.style.color = '#16a34a';
+    freeLabel.style.fontWeight = '700';
+
+    title.append(mainTitle, freeLabel);
+  } else {
+    title.textContent = item.title;
+  }
+
+  const description = document.createElement('p');
+  description.textContent = item.description || '';
+
+  const action = document.createElement('span');
+  action.className = 'topic-action';
+
+  if (type === 'course') {
+    action.textContent = `Explore ${item.title} →`;
+  } else if (type === 'sat-category') {
+    action.textContent = 'Explore Practices →';
+  } else if (type === 'practice') {
+    action.textContent = 'Start Practice →';
+  } else if (isLink) {
+    action.textContent = 'Explore Interactive →';
+  } else {
+    action.textContent = 'Coming Soon';
+  }
+
+  card.append(icon, category, title, description, action);
+
+  return card;
+}
+
+function matchesSearch(item, query) {
+  const normalized = query.trim().toLowerCase();
+
+  return [
+    item.title,
+    item.category,
+    item.description
+  ].some(value =>
+    String(value || '').toLowerCase().includes(normalized)
+  );
+}
+
+function showQuestion(questionId) {
+  const question = satQuestions.find(
+    item =>
+      item.id === questionId &&
+      item.practiceId === currentPractice &&
+      item.difficulty === currentDifficulty
+  );
+
+  if (!question) {
+    return;
+  }
+
+  currentQuestion = questionId;
+
+  practiceView.replaceChildren();
+
+  const heading = document.createElement('h2');
+  heading.textContent = question.number;
+  heading.style.fontSize = 'clamp(24px, 3vw, 34px)';
+  heading.style.marginBottom = '8px';
+
+  const type = document.createElement('p');
+  type.textContent = question.type;
+  type.style.color = '#64748b';
+  type.style.marginBottom = '25px';
+
+  const viewer = document.createElement('div');
+  viewer.className = 'sat-question-viewer';
+
+  practiceView.append(heading, type, viewer);
+
+  backButton.hidden = false;
+  backButton.textContent = '← Back to Questions';
+
+  renderSatQuestion(viewer, questionId);
+}
+
+function renderPractice() {
+  const practice = satPractices.find(
+    item => item.id === currentPractice
+  );
+
+  if (!practice) {
+    currentPractice = null;
+    currentQuestion = null;
+    renderLibrary();
+    return;
+  }
+
+  topicGrid.hidden = true;
+  librarySummary.hidden = true;
+  searchContainer.hidden = true;
+  emptyMessage.hidden = true;
+  practiceView.hidden = false;
+
+  backButton.hidden = false;
+
+  if (currentQuestion !== null) {
+    showQuestion(currentQuestion);
+    return;
+  }
+
+  backButton.textContent = '← Back to SAT Algebra';
+
+  practiceView.replaceChildren();
+
+  const heading = document.createElement('h2');
+  heading.textContent = practice.title;
+  heading.style.fontSize = 'clamp(24px, 3vw, 34px)';
+  heading.style.marginBottom = '12px';
+
+  const introduction = document.createElement('p');
+  introduction.textContent =
+    'Choose a difficulty level to explore SAT Math practice questions.';
+  introduction.style.color = '#64748b';
+  introduction.style.marginBottom = '28px';
+
+  const tabs = document.createElement('div');
+  tabs.setAttribute('role', 'tablist');
+  tabs.setAttribute('aria-label', 'Practice difficulty');
+  tabs.style.display = 'flex';
+  tabs.style.gap = '10px';
+  tabs.style.flexWrap = 'wrap';
+  tabs.style.borderBottom = '1px solid #e2e8f0';
+  tabs.style.marginBottom = '28px';
+
+  const panel = document.createElement('section');
+  panel.id = 'difficulty-panel';
+  panel.setAttribute('role', 'tabpanel');
+  panel.tabIndex = 0;
+
+  const difficulties = ['easy', 'medium', 'hard'];
+  const buttons = [];
+
+  function updateDifficulty(difficulty) {
+    currentDifficulty = difficulty;
+
+    buttons.forEach(button => {
+      const active =
+        button.dataset.difficulty === difficulty;
+
+      button.setAttribute(
+        'aria-selected',
+        String(active)
+      );
+
+      button.tabIndex = active ? 0 : -1;
+      button.style.color =
+        active ? '#2563eb' : '#64748b';
+
+      button.style.borderBottom = active
+        ? '3px solid #2563eb'
+        : '3px solid transparent';
+
+      button.style.fontWeight =
+        active ? '750' : '600';
+
+      if (active) {
+        panel.setAttribute(
+          'aria-labelledby',
+          button.id
+        );
+      }
+    });
+
+    const label =
+      difficulty.charAt(0).toUpperCase() +
+      difficulty.slice(1);
+
+    panel.replaceChildren();
+
+    const title = document.createElement('h3');
+    title.textContent = `${label} Practice`;
+    title.style.fontSize = '23px';
+    title.style.marginBottom = '20px';
+
+    panel.append(title);
+
+    const questions = satQuestions.filter(
+      question =>
+        question.practiceId === currentPractice &&
+        question.difficulty === difficulty
+    );
+
+    if (questions.length === 0) {
+      const empty = document.createElement('p');
+      empty.textContent =
+        'Questions will be added here soon.';
+      empty.style.color = '#64748b';
+      panel.append(empty);
+      return;
+    }
+
+    questions.forEach(question => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'sat-question-row';
+
+      const number = document.createElement('strong');
+      number.textContent = question.number;
+
+      const type = document.createElement('span');
+      type.textContent = question.type;
+
+      const arrow = document.createElement('span');
+      arrow.textContent = '→';
+      arrow.setAttribute('aria-hidden', 'true');
+
+      card.append(number, type, arrow);
+
+      card.addEventListener('click', () => {
+        showQuestion(question.id);
+      });
+
+      panel.append(card);
+    });
+  }
+
+  difficulties.forEach(difficulty => {
+    const button = document.createElement('button');
+
+    const label =
+      difficulty.charAt(0).toUpperCase() +
+      difficulty.slice(1);
+
+    button.type = 'button';
+    button.textContent = label;
+    button.dataset.difficulty = difficulty;
+    button.id = `difficulty-tab-${difficulty}`;
+
+    button.setAttribute('role', 'tab');
+    button.setAttribute(
+      'aria-controls',
+      'difficulty-panel'
+    );
+
+    button.style.background = 'transparent';
+    button.style.border = 'none';
+    button.style.padding = '12px 22px';
+    button.style.cursor = 'pointer';
+    button.style.font = 'inherit';
+    button.style.fontSize = '16px';
+
+    button.addEventListener('click', () => {
+      updateDifficulty(difficulty);
+    });
+
+    button.addEventListener('keydown', event => {
+      if (
+        event.key !== 'ArrowRight' &&
+        event.key !== 'ArrowLeft' &&
+        event.key !== 'Home' &&
+        event.key !== 'End'
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const index = difficulties.indexOf(difficulty);
+      let nextIndex = index;
+
+      if (event.key === 'ArrowRight') {
+        nextIndex = (index + 1) % difficulties.length;
+      } else if (event.key === 'ArrowLeft') {
+        nextIndex =
+          (index - 1 + difficulties.length) %
+          difficulties.length;
+      } else if (event.key === 'Home') {
+        nextIndex = 0;
+      } else if (event.key === 'End') {
+        nextIndex = difficulties.length - 1;
+      }
+
+      updateDifficulty(difficulties[nextIndex]);
+      buttons[nextIndex].focus();
+    });
+
+    buttons.push(button);
+    tabs.append(button);
+  });
+
+  practiceView.append(
+    heading,
+    introduction,
+    tabs,
+    panel
+  );
+
+  updateDifficulty(currentDifficulty);
+}
+
+function renderLibrary() {
+  if (currentPractice !== null) {
+    renderPractice();
+    return;
+  }
+
+  practiceView.hidden = true;
+  topicGrid.hidden = false;
+  librarySummary.hidden = false;
+  searchContainer.hidden = false;
+
+  const query = searchInput.value;
+
+  let items = [];
+  let type = 'course';
+
+  if (currentCourse === null) {
+    items = freeCourses;
+    type = 'course';
+
+    libraryTitle.textContent =
+      'Explore Free Courses';
+
+    backButton.hidden = true;
+    backButton.textContent =
+      '← Back to Courses';
+  } else if (currentCourse === 'sat-math') {
+    backButton.hidden = false;
+
+    if (currentSatCategory === null) {
+      items = satCategories;
+      type = 'sat-category';
+
+      libraryTitle.textContent =
+        'SAT Math Practices';
+
+      backButton.textContent =
+        '← Back to Courses';
+    } else {
+      items = satPractices.filter(
+        item =>
+          item.categoryId === currentSatCategory
+      );
+
+      type = 'practice';
+
+      const selectedCategory =
+        satCategories.find(
+          item =>
+            item.id === currentSatCategory
+        );
+
+      libraryTitle.textContent =
+        selectedCategory?.title ||
+        'SAT Math Practices';
+
+      backButton.textContent =
+        '← Back to SAT Math Practices';
+    }
+  } else {
+    items = interactiveTopics.filter(
+      item =>
+        item.courseId === currentCourse
+    );
+
+    type = 'topic';
+
+    const course = freeCourses.find(
+      item =>
+        item.id === currentCourse
+    );
+
+    libraryTitle.textContent =
+      `${course?.title || 'Mathematics'} Topics`;
+
+    backButton.hidden = false;
+    backButton.textContent =
+      '← Back to Courses';
+  }
+
+  const filtered = items.filter(
+    item => matchesSearch(item, query)
+  );
+
+  topicGrid.replaceChildren(
+    ...filtered.map(
+      item => createCard(item, type)
+    )
+  );
+
+  let countLabel;
+
+  if (type === 'course') {
+    countLabel =
+      filtered.length === 1
+        ? 'course'
+        : 'courses';
+  } else if (type === 'sat-category') {
+    countLabel =
+      filtered.length === 1
+        ? 'category'
+        : 'categories';
+  } else if (type === 'practice') {
+    countLabel =
+      filtered.length === 1
+        ? 'practice'
+        : 'practices';
+  } else {
+    countLabel =
+      filtered.length === 1
+        ? 'interactive visual'
+        : 'interactive visuals';
+  }
+
+  topicCount.textContent =
+    `${filtered.length} ${countLabel}`;
+
+  emptyMessage.hidden =
+    filtered.length !== 0;
+
+  if (
+    filtered.length === 0 &&
+    !query.trim()
+  ) {
+    if (type === 'practice') {
+      emptyMessage.textContent =
+        'Practice questions will be added here soon.';
+    } else {
+      emptyMessage.textContent =
+        'No mathematics content has been added yet.';
+    }
+  } else {
+    emptyMessage.textContent =
+      'No matching mathematics content found.';
+  }
+}
+
+searchInput.addEventListener(
+  'input',
+  renderLibrary
+);
+
+backButton.addEventListener('click', () => {
+  if (currentQuestion !== null) {
+    currentQuestion = null;
+  } else if (currentPractice !== null) {
+    currentPractice = null;
+  } else if (
+    currentCourse === 'sat-math' &&
+    currentSatCategory !== null
+  ) {
+    currentSatCategory = null;
+  } else {
+    currentCourse = null;
+    currentSatCategory = null;
+  }
+
+  searchInput.value = '';
+  renderLibrary();
+});
+
+renderLibrary();

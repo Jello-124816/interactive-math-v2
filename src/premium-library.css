@@ -358,3 +358,19 @@
     transition: none;
   }
 }
+/* FINAL FIX: Match the Free Library container */
+
+.premium-page > main.library-page.container {
+  box-sizing: border-box;
+  width: min(1160px, calc(100% - 48px));
+  max-width: 1160px;
+  margin-left: auto;
+  margin-right: auto;
+  flex: 1 0 auto;
+}
+
+@media (max-width: 600px) {
+  .premium-page > main.library-page.container {
+    width: calc(100% - 32px);
+  }
+}
