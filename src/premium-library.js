@@ -1,7 +1,8 @@
 
 import { collection, getDocs } from 'firebase/firestore';
 
-const base = import.meta.env.BASE_URL;
+import './lesson-viewer.css';
+import { renderLessonViewer } from './lesson-viewer.js';
 
 function escapeHTML(value = '') {
   return String(value).replace(/[&<>"']/g, (char) => ({
@@ -21,7 +22,14 @@ export function createPremiumLibrary(container, db) {
   let currentView = 'courses';
   let selectedCourse = null;
   let selectedTopic = null;
+  let selectedLesson = null;
   let searchTerm = '';
+
+  let destroyed = false;
+
+  // Stores the cleanup function for the current
+  // interactive lesson visual.
+  let cleanupLessonVisual = () => {};
 
   container.innerHTML = `
     <section class="premium-library">
@@ -44,6 +52,7 @@ export function createPremiumLibrary(container, db) {
       </div>
 
       <div id="library-breadcrumb"></div>
+
       <div id="library-content" aria-live="polite">
         Loading library...
       </div>
@@ -68,7 +77,9 @@ export function createPremiumLibrary(container, db) {
       return `
         <div class="library-empty">
           <h3>Nothing here yet</h3>
-          <p>Content will appear here when it is added.</p>
+          <p>
+            Content will appear here when it is added.
+          </p>
         </div>
       `;
     }
@@ -83,12 +94,25 @@ export function createPremiumLibrary(container, db) {
             data-id="${escapeHTML(item.id)}"
           >
             <span class="premium-library-icon">
-              ${type === 'course' ? '▣' : type === 'topic' ? '▤' : '▧'}
+              ${
+                type === 'course'
+                  ? '▣'
+                  : type === 'topic'
+                    ? '▤'
+                    : '▧'
+              }
             </span>
+
             <span class="premium-library-card-text">
-              <strong>${escapeHTML(item.title || 'Untitled')}</strong>
-              <small>${escapeHTML(item.description || '')}</small>
+              <strong>
+                ${escapeHTML(item.title || 'Untitled')}
+              </strong>
+
+              <small>
+                ${escapeHTML(item.description || '')}
+              </small>
             </span>
+
             <span aria-hidden="true">→</span>
           </button>
         `).join('')}
@@ -96,26 +120,44 @@ export function createPremiumLibrary(container, db) {
     `;
   }
 
+  function cleanupCurrentVisual() {
+    cleanupLessonVisual();
+    cleanupLessonVisual = () => {};
+  }
+
   function render() {
+    if (destroyed) return;
+
+    // Clean up the previous interactive visual before
+    // replacing the current lesson content.
+    cleanupCurrentVisual();
+
     backButton.hidden = currentView === 'courses';
+    searchInput.hidden = currentView === 'viewer';
 
     if (currentView === 'courses') {
       breadcrumb.textContent = 'All Courses';
-      content.innerHTML = makeCards(filtered(courses), 'course');
-    }
 
-    if (currentView === 'topics') {
+      content.innerHTML = makeCards(
+        filtered(courses),
+        'course'
+      );
+
+    } else if (currentView === 'topics') {
       breadcrumb.textContent =
         `All Courses / ${selectedCourse?.title || 'Course'}`;
 
       const matchingTopics = topics.filter(
-        (topic) => topic.courseId === selectedCourse?.id
+        (topic) =>
+          topic.courseId === selectedCourse?.id
       );
 
-      content.innerHTML = makeCards(filtered(matchingTopics), 'topic');
-    }
+      content.innerHTML = makeCards(
+        filtered(matchingTopics),
+        'topic'
+      );
 
-    if (currentView === 'lessons') {
+    } else if (currentView === 'lessons') {
       breadcrumb.textContent =
         `All Courses / ${selectedCourse?.title || 'Course'} / ${selectedTopic?.title || 'Topic'}`;
 
@@ -125,54 +167,129 @@ export function createPremiumLibrary(container, db) {
           lesson.topicId === selectedTopic?.id
       );
 
-      content.innerHTML = makeCards(filtered(matchingLessons), 'lesson');
+      content.innerHTML = makeCards(
+        filtered(matchingLessons),
+        'lesson'
+      );
+
+    } else if (currentView === 'viewer') {
+      breadcrumb.textContent =
+        `All Courses / ${selectedCourse?.title || 'Course'} / ${selectedTopic?.title || 'Topic'} / ${selectedLesson?.title || 'Lesson'}`;
+
+      // Mount the reusable lesson viewer.
+      // It returns a function that cleans up its
+      // interactive visual.
+      cleanupLessonVisual = renderLessonViewer(
+        content,
+        selectedLesson
+      );
     }
   }
 
-  content.addEventListener('click', (event) => {
-    const card = event.target.closest('[data-type][data-id]');
-    if (!card) return;
+  function handleCardClick(event) {
+    if (destroyed) return;
+
+    const card = event.target.closest(
+      '[data-type][data-id]'
+    );
+
+    if (!card || !content.contains(card)) return;
 
     const { type, id } = card.dataset;
 
     if (type === 'course') {
-      selectedCourse = courses.find((item) => item.id === id);
+      selectedCourse = courses.find(
+        (item) => item.id === id
+      );
+
       if (!selectedCourse) return;
 
+      selectedTopic = null;
+      selectedLesson = null;
       currentView = 'topics';
+
     } else if (type === 'topic') {
-      selectedTopic = topics.find((item) => item.id === id);
+      selectedTopic = topics.find(
+        (item) =>
+          item.id === id &&
+          item.courseId === selectedCourse?.id
+      );
+
       if (!selectedTopic) return;
 
+      selectedLesson = null;
       currentView = 'lessons';
+
     } else if (type === 'lesson') {
-      // Lesson pages will be implemented in Step 6B.
+      selectedLesson = lessons.find(
+        (item) =>
+          item.id === id &&
+          item.courseId === selectedCourse?.id &&
+          item.topicId === selectedTopic?.id
+      );
+
+      if (!selectedLesson) return;
+
+      currentView = 'viewer';
+
+    } else {
       return;
     }
 
     searchTerm = '';
     searchInput.value = '';
-    render();
-  });
 
-  backButton.addEventListener('click', () => {
-    if (currentView === 'lessons') {
+    render();
+  }
+
+  function handleBackClick() {
+    if (destroyed) return;
+
+    if (currentView === 'viewer') {
+      currentView = 'lessons';
+      selectedLesson = null;
+
+    } else if (currentView === 'lessons') {
       currentView = 'topics';
       selectedTopic = null;
+
     } else {
       currentView = 'courses';
       selectedCourse = null;
+      selectedTopic = null;
+      selectedLesson = null;
     }
 
     searchTerm = '';
     searchInput.value = '';
-    render();
-  });
 
-  searchInput.addEventListener('input', () => {
-    searchTerm = searchInput.value.trim().toLowerCase();
     render();
-  });
+  }
+
+  function handleSearch() {
+    if (destroyed) return;
+
+    searchTerm = searchInput.value
+      .trim()
+      .toLowerCase();
+
+    render();
+  }
+
+  content.addEventListener(
+    'click',
+    handleCardClick
+  );
+
+  backButton.addEventListener(
+    'click',
+    handleBackClick
+  );
+
+  searchInput.addEventListener(
+    'input',
+    handleSearch
+  );
 
   async function load() {
     try {
@@ -182,10 +299,14 @@ export function createPremiumLibrary(container, db) {
         getDocs(collection(db, 'lessons'))
       ]);
 
+      // Ignore results from an abandoned library
+      // after sign-out or account switching.
+      if (destroyed) return;
+
       const convert = (snapshot) =>
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
+        snapshot.docs.map((document) => ({
+          ...document.data(),
+          id: document.id
         }));
 
       courses = convert(results[0]);
@@ -200,12 +321,24 @@ export function createPremiumLibrary(container, db) {
       lessons.sort(byOrder);
 
       render();
+
     } catch (error) {
-      console.error('Library loading failed:', error);
+      if (destroyed) return;
+
+      console.error(
+        'Library loading failed:',
+        error
+      );
+
+      cleanupCurrentVisual();
+
       content.innerHTML = `
         <div class="library-empty">
           <h3>Unable to load the library</h3>
-          <p>Please check the database connection and access permissions.</p>
+          <p>
+            Please check the database connection
+            and access permissions.
+          </p>
         </div>
       `;
     }
@@ -215,7 +348,40 @@ export function createPremiumLibrary(container, db) {
 
   return {
     destroy() {
+      if (destroyed) return;
+
+      destroyed = true;
+
+      // Stop the active interactive component.
+      cleanupCurrentVisual();
+
+      // Remove event listeners.
+      content.removeEventListener(
+        'click',
+        handleCardClick
+      );
+
+      backButton.removeEventListener(
+        'click',
+        handleBackClick
+      );
+
+      searchInput.removeEventListener(
+        'input',
+        handleSearch
+      );
+
+      // Remove library content.
       container.replaceChildren();
+
+      courses = [];
+      topics = [];
+      lessons = [];
+
+      selectedCourse = null;
+      selectedTopic = null;
+      selectedLesson = null;
+      searchTerm = '';
     }
   };
 }

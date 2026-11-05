@@ -1,0 +1,67 @@
+
+.visual-graph {
+  padding: 22px;
+  border: 1px solid #dbe4f0;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.visual-graph h4 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  color: #17365e;
+}
+
+.visual-equation {
+  margin: 12px 0 20px;
+  font-size: 21px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.visual-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.visual-control {
+  display: grid;
+  grid-template-columns: 140px 1fr 45px;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.visual-control label {
+  font-weight: 600;
+  color: #17365e;
+}
+
+.visual-control input {
+  width: 100%;
+  accent-color: #2563eb;
+}
+
+.visual-control output {
+  text-align: right;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .visual-graph {
+    padding: 14px;
+  }
+
+  .visual-control {
+    grid-template-columns: 1fr 55px;
+    gap: 8px;
+  }
+
+  .visual-control label {
+    grid-column: 1 / -1;
+  }
+}
