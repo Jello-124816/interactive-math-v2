@@ -12,122 +12,145 @@ import {
   onAuthStateChanged
 } from 'firebase/auth';
 
-import {
-  doc,
-  getDoc,
-  collection,
-  getDocs
-} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 const base = import.meta.env.BASE_URL;
 const app = document.querySelector('#app');
 
 app.innerHTML = `
-  <div class="math-page">
+  <div class="premium-page">
     <header class="site-header">
-      <div class="header-inner">
-        <a class="brand" href="${base}">
-          <span class="brand-mark">∑</span>
+      <div class="container header-inner">
+        <a href="${base}" class="brand">
+          <span class="logo-placeholder">∑</span>
           <span class="brand-name">Interactive Mathematics</span>
         </a>
 
-        <nav class="header-nav">
+        <nav class="header-nav" aria-label="Main navigation">
           <a href="${base}">Home</a>
           <a href="${base}free.html">Free</a>
-          <a href="${base}premium.html">Premium</a>
+          <a href="${base}premium.html" aria-current="page">
+            Premium
+          </a>
         </nav>
+
+        <div id="account-controls" class="account-controls" hidden>
+          <button
+            id="account-settings-button"
+            class="account-settings-button"
+            type="button"
+            aria-expanded="false"
+            aria-controls="account-settings-panel"
+          >
+            ⚙ Account
+          </button>
+        </div>
       </div>
     </header>
 
-    <main class="math-content"
-      style="max-width:760px;margin:60px auto;padding:0 20px;">
+    <main class="library-page container">
+      <a class="back-link" href="${base}">
+        ← Back to Home
+      </a>
 
-      <a class="back-link" href="${base}">← Back to Home</a>
+      <div id="auth-loading">
+        <p>Checking your account...</p>
+      </div>
 
-      <h1>Premium Mathematics</h1>
-      <p>Sign in with Google to manage your premium access.</p>
-
-      <section class="interactive-card"
-        style="padding:30px;margin-top:28px;">
-
-        <div id="auth-loading">
-          Checking your account...
-        </div>
-
-        <div id="signed-out" hidden>
-          <h2>Welcome to Premium Mathematics</h2>
-          <p>Use your Google account to sign in.</p>
-
-          <button
-            id="google-login"
-            class="btn btn-primary"
-            type="button">
-            Sign in with Google
-          </button>
-        </div>
-
-        <div id="signed-in" hidden>
-          <h2 id="welcome-message"></h2>
-          <p id="user-email"></p>
-
-          <p id="access-message" aria-live="polite">
-            Checking premium approval...
+      <section id="signed-out" class="premium-auth-screen" hidden>
+        <div class="library-heading">
+          <h1>Premium Mathematics</h1>
+          <p>
+            Sign in with Google to access premium mathematics
+            courses and interactive lessons.
           </p>
-
-          <div id="premium-granted" hidden>
-            <h3>Premium Access Granted</h3>
-            <p>
-              Your account has been approved for
-              premium mathematics notes.
-            </p>
-          </div>
-
-          <div id="premium-pending" hidden>
-            <h3>Awaiting Premium Approval</h3>
-            <p>
-              Your Google account is connected.
-              Premium access requires payment
-              verification and administrator approval.
-            </p>
-          </div>
-
-          <p id="admin-message" hidden>
-            Administrator account
-          </p>
-
-          <button
-            id="logout"
-            class="btn btn-secondary"
-            type="button">
-            Sign out
-          </button>
         </div>
 
-        <p
-          id="auth-error"
-          role="alert"
-          style="color:#b91c1c;">
-        </p>
+        <button
+          id="google-login"
+          class="btn btn-primary"
+          type="button"
+        >
+          Sign in with Google
+        </button>
       </section>
 
-      <div id="premium-library-root" hidden></div>
+      <section id="premium-pending" class="premium-auth-screen" hidden>
+        <div class="library-heading">
+          <h1>Premium Access Pending</h1>
+          <p>
+            Your Google account is connected, but premium
+            access requires payment verification and
+            administrator approval.
+          </p>
+        </div>
 
-      <section
-        id="premium-library"
-        class="interactive-card"
-        style="padding:30px;margin-top:28px;"
-        hidden>
-
-        <h2>Existing Premium Lessons</h2>
-
-        <p>
-          These lessons are preserved from your
-          original premium collection.
-        </p>
-
-        <div id="premium-lessons" aria-live="polite"></div>
+        <p id="pending-email"></p>
+        <p id="pending-status">Premium access: Not approved</p>
       </section>
+
+      <section id="premium-approved" hidden>
+        <div id="premium-library-root"></div>
+      </section>
+
+      <p id="auth-error" role="alert" aria-live="polite"></p>
     </main>
+
+    <div
+      id="account-settings-panel"
+      class="account-settings-panel"
+      hidden
+    >
+      <div class="account-settings-heading">
+        <h2>Account Settings</h2>
+        <button
+          id="close-account-settings"
+          type="button"
+          aria-label="Close account settings"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="account-profile">
+        <img
+          id="account-photo"
+          class="account-photo"
+          alt="Google profile"
+          hidden
+        />
+
+        <div>
+          <strong id="account-name">Student</strong>
+          <p id="account-email"></p>
+        </div>
+      </div>
+
+      <div class="account-setting-row">
+        <span>Premium Access</span>
+        <strong id="account-access">Checking...</strong>
+      </div>
+
+      <div class="account-setting-row">
+        <span>Account Role</span>
+        <strong id="account-role">Student</strong>
+      </div>
+
+      <button
+        id="logout"
+        class="account-logout"
+        type="button"
+      >
+        Sign Out
+      </button>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <span>Interactive Mathematics</span>
+        <span>Explore mathematics visually.</span>
+      </div>
+    </footer>
   </div>
 `;
 
@@ -135,106 +158,113 @@ const $ = (selector) => document.querySelector(selector);
 
 const loading = $('#auth-loading');
 const signedOut = $('#signed-out');
-const signedIn = $('#signed-in');
+const premiumPending = $('#premium-pending');
+const premiumApproved = $('#premium-approved');
 const errorMessage = $('#auth-error');
 
-const accessMessage = $('#access-message');
-const premiumGranted = $('#premium-granted');
-const premiumPending = $('#premium-pending');
-const adminMessage = $('#admin-message');
-
-const premiumLibrary = $('#premium-library');
-const premiumLessons = $('#premium-lessons');
 const libraryRoot = $('#premium-library-root');
+
+const accountControls = $('#account-controls');
+const accountButton = $('#account-settings-button');
+const accountPanel = $('#account-settings-panel');
+const closeAccountButton = $('#close-account-settings');
 
 let accountCheck = 0;
 let libraryInstance = null;
 
+function closeAccountSettings() {
+  accountPanel.hidden = true;
+  accountButton.setAttribute('aria-expanded', 'false');
+}
+
+function openAccountSettings() {
+  if (accountControls.hidden) return;
+
+  accountPanel.hidden = false;
+  accountButton.setAttribute('aria-expanded', 'true');
+}
+
 function hidePremiumLibrary() {
   libraryInstance?.destroy();
   libraryInstance = null;
-  libraryRoot.hidden = true;
+
+  libraryRoot.replaceChildren();
+  premiumApproved.hidden = true;
 }
 
 function showPremiumLibrary() {
   hidePremiumLibrary();
-  libraryRoot.hidden = false;
+
+  premiumApproved.hidden = false;
   libraryInstance = createPremiumLibrary(libraryRoot, db);
 }
 
-function resetAccess() {
-  premiumGranted.hidden = true;
-  premiumPending.hidden = true;
-  adminMessage.hidden = true;
-
+function resetPage() {
+  closeAccountSettings();
   hidePremiumLibrary();
 
-  premiumLibrary.hidden = true;
-  premiumLessons.replaceChildren();
+  signedOut.hidden = true;
+  premiumPending.hidden = true;
+  accountControls.hidden = true;
 
-  accessMessage.textContent = '';
+  $('#account-name').textContent = 'Student';
+  $('#account-email').textContent = '';
+  $('#account-access').textContent = 'Checking...';
+  $('#account-role').textContent = 'Student';
+  $('#pending-email').textContent = '';
+
+  const photo = $('#account-photo');
+  photo.hidden = true;
+  photo.removeAttribute('src');
 }
 
-async function loadPremiumLessons(currentCheck) {
-  premiumLessons.textContent = 'Loading premium lessons...';
+function setAccountProfile(user) {
+  $('#account-name').textContent =
+    user.displayName || 'Student';
 
-  try {
-    const lessonsRef = collection(db, 'premiumLessons');
-    const snapshot = await getDocs(lessonsRef);
+  $('#account-email').textContent = user.email || '';
+  $('#pending-email').textContent = user.email || '';
 
-    if (currentCheck !== accountCheck) return;
+  const photo = $('#account-photo');
 
-    premiumLessons.replaceChildren();
-
-    if (snapshot.empty) {
-      premiumLessons.textContent =
-        'No existing premium lessons are available yet.';
-      return;
-    }
-
-    const lessons = snapshot.docs.map((lessonDoc) => ({
-      id: lessonDoc.id,
-      ...lessonDoc.data()
-    }));
-
-    lessons.sort((a, b) =>
-      String(a.title || '').localeCompare(
-        String(b.title || '')
-      )
-    );
-
-    lessons.forEach((lesson) => {
-      const article = document.createElement('article');
-
-      article.style.cssText = `
-        padding: 22px;
-        margin-top: 18px;
-        border: 1px solid #dbe4f0;
-        border-radius: 14px;
-        background: #ffffff;
-      `;
-
-      const title = document.createElement('h3');
-      title.textContent = lesson.title || 'Untitled Lesson';
-      title.style.marginTop = '0';
-
-      const content = document.createElement('p');
-      content.textContent = lesson.content || '';
-      content.style.whiteSpace = 'pre-wrap';
-
-      article.append(title, content);
-      premiumLessons.append(article);
-    });
-
-  } catch (error) {
-    if (currentCheck !== accountCheck) return;
-
-    console.error('Premium lesson loading error:', error);
-
-    premiumLessons.textContent =
-      'Unable to load existing premium lessons. Please check your Firestore rules.';
+  if (user.photoURL) {
+    photo.src = user.photoURL;
+    photo.hidden = false;
+  } else {
+    photo.hidden = true;
+    photo.removeAttribute('src');
   }
 }
+
+accountButton.addEventListener('click', () => {
+  if (accountPanel.hidden) {
+    openAccountSettings();
+  } else {
+    closeAccountSettings();
+  }
+});
+
+closeAccountButton.addEventListener(
+  'click',
+  closeAccountSettings
+);
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    closeAccountSettings();
+  }
+});
+
+document.addEventListener('click', (event) => {
+  if (accountPanel.hidden) return;
+
+  if (
+    !accountPanel.contains(event.target) &&
+    !accountButton.contains(event.target)
+  ) {
+    closeAccountSettings();
+  }
+});
 
 $('#google-login').addEventListener('click', async () => {
   errorMessage.textContent = '';
@@ -260,84 +290,88 @@ $('#logout').addEventListener('click', async () => {
   }
 });
 
-onAuthStateChanged(auth, async (user) => {
-  const currentCheck = ++accountCheck;
+onAuthStateChanged(
+  auth,
+  async (user) => {
+    const currentCheck = ++accountCheck;
 
-  loading.hidden = true;
-  errorMessage.textContent = '';
+    loading.hidden = true;
+    errorMessage.textContent = '';
 
-  resetAccess();
+    resetPage();
 
-  signedOut.hidden = Boolean(user);
-  signedIn.hidden = !user;
-
-  if (!user) return;
-
-  $('#welcome-message').textContent =
-    `Welcome, ${user.displayName || 'Student'}!`;
-
-  $('#user-email').textContent = user.email || '';
-
-  accessMessage.textContent = 'Checking premium approval...';
-
-  try {
-    const userRef = doc(db, 'users', user.uid);
-    const snapshot = await getDoc(userRef);
-
-    if (currentCheck !== accountCheck) return;
-
-    if (!snapshot.exists()) {
-      accessMessage.textContent =
-        'Premium access: Not approved';
-
-      premiumPending.hidden = false;
+    if (!user) {
+      signedOut.hidden = false;
       return;
     }
 
-    const userData = snapshot.data();
+    accountControls.hidden = false;
+    setAccountProfile(user);
 
-    const isApproved = userData.premiumApproved === true;
-    const isAdmin = userData.role === 'admin';
+    premiumPending.hidden = false;
+    $('#pending-status').textContent =
+      'Checking premium approval...';
 
-    if (isAdmin) {
-      adminMessage.hidden = false;
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const snapshot = await getDoc(userRef);
+
+      if (currentCheck !== accountCheck) return;
+
+      if (!snapshot.exists()) {
+        $('#account-access').textContent = 'Not Approved';
+        $('#pending-status').textContent =
+          'Premium access: Not approved';
+        return;
+      }
+
+      const userData = snapshot.data();
+
+      const isApproved =
+        userData.premiumApproved === true;
+
+      const isAdmin =
+        userData.role === 'admin';
+
+      $('#account-role').textContent =
+        isAdmin ? 'Administrator' : 'Student';
+
+      $('#account-access').textContent =
+        isApproved ? 'Approved' : 'Not Approved';
+
+      if (isApproved) {
+        premiumPending.hidden = true;
+        showPremiumLibrary();
+      } else {
+        $('#pending-status').textContent =
+          'Premium access: Not approved';
+      }
+
+    } catch (error) {
+      if (currentCheck !== accountCheck) return;
+
+      hidePremiumLibrary();
+
+      $('#account-access').textContent = 'Unavailable';
+      $('#pending-status').textContent =
+        'Unable to verify premium access.';
+
+      console.error('Premium approval check failed:', error);
+
+      errorMessage.textContent =
+        'Unable to verify premium access. Please try again.';
     }
+  },
+  (error) => {
+    accountCheck++;
+    loading.hidden = true;
 
-    if (isApproved) {
-      accessMessage.textContent =
-        'Premium access: Approved';
+    resetPage();
+    signedOut.hidden = false;
 
-      premiumGranted.hidden = false;
-
-      showPremiumLibrary();
-
-      premiumLibrary.hidden = false;
-      await loadPremiumLessons(currentCheck);
-
-    } else {
-      accessMessage.textContent =
-        'Premium access: Not approved';
-
-      premiumPending.hidden = false;
-    }
-
-  } catch (error) {
-    if (currentCheck !== accountCheck) return;
-
-    resetAccess();
-
-    accessMessage.textContent =
-      'Unable to verify premium access.';
+    console.error('Authentication error:', error);
 
     errorMessage.textContent =
-      `Firestore error: ${error.message}`;
+      `Authentication error: ${error.message}`;
   }
-
-}, (error) => {
-  accountCheck++;
-  loading.hidden = true;
-  resetAccess();
-
-  errorMessage.textContent =
-    `Authentication error: ${error.message}`;
-});
+);

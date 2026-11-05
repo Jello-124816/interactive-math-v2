@@ -1,112 +1,185 @@
 
+/*
+  Premium Mathematics Library
+  Uses the same visual design as the Free Library.
+
+  Shared styles are defined in free.css:
+  .library-page
+  .library-heading
+  .library-search
+  .library-summary
+  .topic-grid
+  .topic-card
+  .topic-icon
+  .topic-category
+  .topic-action
+*/
+
+/* Premium library container */
 .premium-library {
-  margin-top: 36px;
-  padding: 30px;
-  background: #fff;
-  border: 1px solid #dbe4f0;
-  border-radius: 24px;
-  color: #102341;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  color: #17253b;
+}
+
+/* Heading */
+.premium-library-heading {
+  max-width: 760px;
+  margin-bottom: 36px;
 }
 
 .premium-library-heading h2 {
-  margin: 0 0 10px;
-  font-size: clamp(24px, 3vw, 32px);
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: 1.2;
+  margin: 0 0 16px;
 }
 
 .premium-library-heading p {
+  font-size: 16px;
+  color: #64748b;
+  line-height: 1.75;
   margin: 0;
-  color: #52647e;
 }
 
+/* Search and back navigation */
 .premium-library-controls {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 26px 0 18px;
+  align-items: flex-end;
+  gap: 14px;
+  max-width: 700px;
+  margin-bottom: 30px;
 }
 
 #library-search {
   width: 100%;
-  padding: 13px 16px;
-  border: 1px solid #d4dfed;
+  min-width: 0;
+  padding: 15px 18px;
+  border: 1px solid #cbd5e1;
   border-radius: 12px;
-  background: #fff;
-  color: #102341;
   font: inherit;
+  font-size: 15px;
+  background: #ffffff;
+  color: #17253b;
 }
 
 #library-search:focus {
-  outline: 2px solid #2563eb;
+  outline: 2px solid #93c5fd;
   outline-offset: 2px;
 }
 
 #library-back {
   flex-shrink: 0;
-  padding: 12px 16px;
-  border: 1px solid #d4dfed;
+  padding: 15px 18px;
+  border: 1px solid #cbd5e1;
   border-radius: 12px;
-  background: #f8fafc;
-  color: #17365e;
+  background: #ffffff;
+  color: #2563eb;
   font: inherit;
+  font-weight: 650;
   cursor: pointer;
 }
 
+#library-back:hover {
+  background: #eff6ff;
+}
+
+#library-back[hidden],
+#library-search[hidden] {
+  display: none;
+}
+
+/* Breadcrumb navigation */
 #library-breadcrumb {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   color: #64748b;
   font-size: 14px;
+  line-height: 1.6;
 }
 
+/* Grid matches Free Library */
 .premium-library-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
 }
 
+/* Cards match Free Library */
 .premium-library-card {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 108px;
-  padding: 20px;
-  border: 1px solid #dbe4f0;
-  border-radius: 16px;
-  background: #fff;
-  color: #102341;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 285px;
+  padding: 28px;
+  background: #ffffff;
+  color: #17253b;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
   text-align: left;
   font: inherit;
   cursor: pointer;
-  transition: border-color .2s, transform .2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .premium-library-card:hover {
-  border-color: #2563eb;
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 }
 
+.premium-library-card:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+/* Icon matches Free Library */
 .premium-library-icon {
-  font-size: 28px;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: #eff6ff;
+  border-radius: 13px;
+  font-size: 26px;
   color: #2563eb;
 }
 
+/* Card text */
 .premium-library-card-text {
-  display: grid;
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
   flex: 1;
   min-width: 0;
 }
 
 .premium-library-card-text strong {
-  font-size: 17px;
+  font-size: 20px;
+  line-height: 1.4;
+  color: #17253b;
 }
 
 .premium-library-card-text small {
   color: #64748b;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.75;
 }
 
+/* Card arrow */
+.premium-library-card > span:last-child {
+  margin-top: auto;
+  color: #2563eb;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Empty and error states */
 .library-empty {
-  padding: 52px 20px;
+  padding: 40px 20px;
   border: 1px dashed #cbd5e1;
   border-radius: 16px;
   text-align: center;
@@ -115,23 +188,252 @@
 
 .library-empty h3 {
   margin: 0 0 8px;
+  color: #17253b;
 }
 
 .library-empty p {
   margin: 0;
   color: #64748b;
+  line-height: 1.7;
 }
 
-@media (max-width: 640px) {
-  .premium-library {
-    padding: 20px;
+/* Tablet */
+@media (max-width: 900px) {
+  .premium-library-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .premium-library-heading {
+    margin-bottom: 26px;
+  }
+
+  .premium-library-heading p {
+    font-size: 14px;
+  }
+
+  .premium-library-controls {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .premium-library-grid {
     grid-template-columns: 1fr;
   }
 
-  .premium-library-controls {
+  .premium-library-card {
+    min-height: auto;
+  }
+}
+
+/* =========================================
+   Premium Account Settings
+   ========================================= */
+
+.premium-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-page > main {
+  width: 100%;
+  flex: 1;
+}
+
+/* Account button in header */
+.account-controls {
+  margin-left: auto;
+}
+
+.account-controls[hidden] {
+  display: none;
+}
+
+.account-settings-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid #dbe4f0;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #17365e;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.account-settings-button:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+/* Account settings popup */
+.account-settings-panel {
+  position: fixed;
+  top: 78px;
+  right: max(20px, calc((100vw - 1200px) / 2));
+  z-index: 1000;
+  width: min(360px, calc(100vw - 32px));
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #dbe4f0;
+  border-radius: 18px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.15);
+}
+
+.account-settings-panel[hidden] {
+  display: none;
+}
+
+.account-settings-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.account-settings-heading h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #17253b;
+}
+
+#close-account-settings {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+#close-account-settings:hover {
+  background: #e2e8f0;
+}
+
+/* Google account information */
+.account-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.account-photo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.account-photo[hidden] {
+  display: none;
+}
+
+.account-profile strong {
+  display: block;
+  font-size: 15px;
+  color: #17253b;
+}
+
+.account-profile p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+/* Premium status and account role */
+.account-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid #edf1f6;
+  font-size: 14px;
+}
+
+.account-setting-row span {
+  color: #64748b;
+}
+
+.account-setting-row strong {
+  color: #17365e;
+  text-align: right;
+}
+
+/* Sign out button */
+.account-logout {
+  width: 100%;
+  margin-top: 22px;
+  padding: 13px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fff7f7;
+  color: #b91c1c;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-logout:hover {
+  background: #fee2e2;
+}
+
+/* Authentication screen */
+.premium-auth-screen {
+  max-width: 760px;
+  padding-top: 12px;
+}
+
+.premium-auth-screen[hidden],
+#premium-approved[hidden] {
+  display: none;
+}
+
+#auth-error {
+  color: #b91c1c;
+  font-size: 14px;
+  margin-top: 16px;
+}
+
+#auth-error:empty {
+  display: none;
+}
+
+/* Mobile layout */
+@media (max-width: 600px) {
+  .premium-page .header-inner {
     flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .account-controls {
+    margin-left: 0;
+  }
+
+  .account-settings-button {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+
+  .account-settings-panel {
+    top: 110px;
+    right: 16px;
+    padding: 20px;
   }
 }
