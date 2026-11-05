@@ -1,9 +1,13 @@
 
-/*
-  Premium Mathematics Library
-  Uses the same visual design as the Free Library.
+/* =========================================
+   PREMIUM PAGE LAYOUT
+   ========================================= */
 
-  Shared styles are defined in free.css:
+/*
+  The Premium Library uses the same classes
+  and styling as the Free Library.
+
+  Shared styles come from free.css:
   .library-page
   .library-heading
   .library-search
@@ -13,224 +17,8 @@
   .topic-icon
   .topic-category
   .topic-action
+  .empty-message
 */
-
-/* Premium library container */
-.premium-library {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  color: #17253b;
-}
-
-/* Heading */
-.premium-library-heading {
-  max-width: 760px;
-  margin-bottom: 36px;
-}
-
-.premium-library-heading h2 {
-  font-size: clamp(30px, 4vw, 48px);
-  line-height: 1.2;
-  margin: 0 0 16px;
-}
-
-.premium-library-heading p {
-  font-size: 16px;
-  color: #64748b;
-  line-height: 1.75;
-  margin: 0;
-}
-
-/* Search and back navigation */
-.premium-library-controls {
-  display: flex;
-  align-items: flex-end;
-  gap: 14px;
-  max-width: 700px;
-  margin-bottom: 30px;
-}
-
-#library-search {
-  width: 100%;
-  min-width: 0;
-  padding: 15px 18px;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  font: inherit;
-  font-size: 15px;
-  background: #ffffff;
-  color: #17253b;
-}
-
-#library-search:focus {
-  outline: 2px solid #93c5fd;
-  outline-offset: 2px;
-}
-
-#library-back {
-  flex-shrink: 0;
-  padding: 15px 18px;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  background: #ffffff;
-  color: #2563eb;
-  font: inherit;
-  font-weight: 650;
-  cursor: pointer;
-}
-
-#library-back:hover {
-  background: #eff6ff;
-}
-
-#library-back[hidden],
-#library-search[hidden] {
-  display: none;
-}
-
-/* Breadcrumb navigation */
-#library-breadcrumb {
-  margin-bottom: 24px;
-  color: #64748b;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-/* Grid matches Free Library */
-.premium-library-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
-}
-
-/* Cards match Free Library */
-.premium-library-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  min-height: 285px;
-  padding: 28px;
-  background: #ffffff;
-  color: #17253b;
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-}
-
-.premium-library-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
-}
-
-.premium-library-card:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 3px;
-}
-
-/* Icon matches Free Library */
-.premium-library-icon {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  background: #eff6ff;
-  border-radius: 13px;
-  font-size: 26px;
-  color: #2563eb;
-}
-
-/* Card text */
-.premium-library-card-text {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  flex: 1;
-  min-width: 0;
-}
-
-.premium-library-card-text strong {
-  font-size: 20px;
-  line-height: 1.4;
-  color: #17253b;
-}
-
-.premium-library-card-text small {
-  color: #64748b;
-  font-size: 14px;
-  line-height: 1.75;
-}
-
-/* Card arrow */
-.premium-library-card > span:last-child {
-  margin-top: auto;
-  color: #2563eb;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-/* Empty and error states */
-.library-empty {
-  padding: 40px 20px;
-  border: 1px dashed #cbd5e1;
-  border-radius: 16px;
-  text-align: center;
-  background: #f8fafc;
-}
-
-.library-empty h3 {
-  margin: 0 0 8px;
-  color: #17253b;
-}
-
-.library-empty p {
-  margin: 0;
-  color: #64748b;
-  line-height: 1.7;
-}
-
-/* Tablet */
-@media (max-width: 900px) {
-  .premium-library-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .premium-library-heading {
-    margin-bottom: 26px;
-  }
-
-  .premium-library-heading p {
-    font-size: 14px;
-  }
-
-  .premium-library-controls {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .premium-library-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .premium-library-card {
-    min-height: auto;
-  }
-}
-
-/* =========================================
-   Premium Account Settings
-   ========================================= */
 
 .premium-page {
   min-height: 100vh;
@@ -239,11 +27,104 @@
 }
 
 .premium-page > main {
-  width: 100%;
   flex: 1;
 }
 
-/* Account button in header */
+/* Same container as the Free Library */
+
+.premium-page > main.library-page.container {
+  width: min(1160px, calc(100% - 48px));
+  max-width: none;
+  margin-inline: auto;
+}
+
+/* =========================================
+   PREMIUM LIBRARY NAVIGATION
+   ========================================= */
+
+#library-back {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+#library-back:hover {
+  color: #1d4ed8;
+}
+
+#library-back[hidden] {
+  display: none;
+}
+
+#library-breadcrumb {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+#library-breadcrumb:empty {
+  display: none;
+}
+
+/* =========================================
+   PREMIUM COURSE CARD
+   ========================================= */
+
+/*
+  No separate card design.
+
+  The Premium Library JavaScript uses:
+  .topic-grid
+  .topic-card
+  .topic-icon
+  .topic-category
+  .topic-action
+
+  These are already styled in free.css.
+*/
+
+/* Remove default button appearance */
+
+.premium-page .topic-card {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.premium-page .topic-card:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+/* =========================================
+   PREMIUM ERROR MESSAGE
+   ========================================= */
+
+#library-error {
+  color: #b91c1c;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-top: 18px;
+}
+
+#library-error[hidden] {
+  display: none;
+}
+
+/* =========================================
+   ACCOUNT SETTINGS BUTTON
+   ========================================= */
+
 .account-controls {
   margin-left: auto;
 }
@@ -274,11 +155,19 @@
   border-color: #93c5fd;
 }
 
-/* Account settings popup */
+.account-settings-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 3px;
+}
+
+/* =========================================
+   ACCOUNT SETTINGS POPUP
+   ========================================= */
+
 .account-settings-panel {
   position: fixed;
   top: 78px;
-  right: max(20px, calc((100vw - 1200px) / 2));
+  right: max(20px, calc((100vw - 1160px) / 2));
   z-index: 1000;
   width: min(360px, calc(100vw - 32px));
   padding: 24px;
@@ -291,6 +180,8 @@
 .account-settings-panel[hidden] {
   display: none;
 }
+
+/* Popup heading */
 
 .account-settings-heading {
   display: flex;
@@ -321,7 +212,10 @@
   background: #e2e8f0;
 }
 
-/* Google account information */
+/* =========================================
+   GOOGLE PROFILE
+   ========================================= */
+
 .account-profile {
   display: flex;
   align-items: center;
@@ -355,7 +249,10 @@
   overflow-wrap: anywhere;
 }
 
-/* Premium status and account role */
+/* =========================================
+   ACCOUNT STATUS
+   ========================================= */
+
 .account-setting-row {
   display: flex;
   align-items: center;
@@ -375,7 +272,10 @@
   text-align: right;
 }
 
-/* Sign out button */
+/* =========================================
+   SIGN OUT BUTTON
+   ========================================= */
+
 .account-logout {
   width: 100%;
   margin-top: 22px;
@@ -394,14 +294,18 @@
   background: #fee2e2;
 }
 
-/* Authentication screen */
+/* =========================================
+   AUTHENTICATION SCREENS
+   ========================================= */
+
 .premium-auth-screen {
   max-width: 760px;
   padding-top: 12px;
 }
 
 .premium-auth-screen[hidden],
-#premium-approved[hidden] {
+#premium-approved[hidden],
+#auth-loading[hidden] {
   display: none;
 }
 
@@ -415,8 +319,15 @@
   display: none;
 }
 
-/* Mobile layout */
+/* =========================================
+   MOBILE
+   ========================================= */
+
 @media (max-width: 600px) {
+  .premium-page > main.library-page.container {
+    width: min(1160px, calc(100% - 32px));
+  }
+
   .premium-page .header-inner {
     flex-wrap: wrap;
     gap: 12px;
@@ -435,5 +346,15 @@
     top: 110px;
     right: 16px;
     padding: 20px;
+  }
+}
+
+/* =========================================
+   ACCESSIBILITY
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .premium-page .topic-card {
+    transition: none;
   }
 }

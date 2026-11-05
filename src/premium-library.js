@@ -1,435 +1,321 @@
 
 import { collection, getDocs } from 'firebase/firestore';
-
-import './lesson-viewer.css';
 import { renderLessonViewer } from './lesson-viewer.js';
+import './lesson-viewer.css';
 
-const CALCULUS_ID = 'calculus';
-
-const calculusCourse = {
-  id: CALCULUS_ID,
+const CALCULUS = {
+  id: 'calculus',
   title: 'Calculus',
   category: 'Premium Course',
   description:
-    'Explore limits, derivatives, integrals, and advanced calculus through detailed lessons and interactive visuals.',
+    'Explore limits, derivatives, integrals, and advanced calculus through interactive lessons.',
   icon: '∫'
 };
-
-function escapeHTML(value = '') {
-  return String(value).replace(/[&<>"']/g, (char) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  })[char]);
-}
 
 export function createPremiumLibrary(container, db) {
   let topics = [];
   let lessons = [];
-
-  let currentView = 'courses';
+  let view = 'courses';
   let selectedTopic = null;
   let selectedLesson = null;
-  let searchTerm = '';
+  let query = '';
   let destroyed = false;
+  let cleanupVisual = () => {};
 
-  let cleanupLessonVisual = () => {};
-
+  // Same structure as src/free.js
   container.innerHTML = `
-    <section class="premium-library">
-      <div class="premium-library-heading">
-        <h2>Premium Mathematics</h2>
-        <p>
-          Discover advanced mathematics through structured
-          lessons, interactive graphs, and diagrams.
-        </p>
-      </div>
+    <div class="library-heading">
+      <h1>Premium Mathematics</h1>
+      <p>
+        Discover advanced mathematics through interactive
+        graphs, diagrams, and adjustable values.
+      </p>
+    </div>
 
-      <div class="premium-library-controls">
-        <button
-          id="library-back"
-          type="button"
-          hidden
-        >
-          ← Back
-        </button>
+    <div class="library-search">
+      <label for="topic-search">
+        Find a mathematics course or topic
+      </label>
+      <input
+        id="topic-search"
+        type="search"
+        placeholder="Search mathematics topics..."
+        autocomplete="off"
+      />
+    </div>
 
-        <input
-          id="library-search"
-          type="search"
-          placeholder="Search mathematics topics..."
-          aria-label="Search premium mathematics"
-          autocomplete="off"
-        />
-      </div>
+    <button id="library-back" type="button" hidden>
+      ← Back
+    </button>
 
-      <div class="library-summary">
-        <h2 id="premium-section-title">
-          Explore Premium Courses
-        </h2>
+    <div class="library-summary">
+      <h2 id="library-title">Explore Premium Courses</h2>
+      <span id="topic-count"></span>
+    </div>
 
-        <span id="premium-item-count"></span>
-      </div>
+    <div id="library-breadcrumb"></div>
+    <div id="topic-grid" class="topic-grid"></div>
 
-      <div id="library-breadcrumb"></div>
+    <p id="empty-message" class="empty-message" hidden>
+      No matching mathematics content found.
+    </p>
 
-      <div id="library-content" aria-live="polite"></div>
-    </section>
+    <div id="lesson-content"></div>
+    <p id="library-error" role="alert" hidden></p>
   `;
 
-  const content = container.querySelector('#library-content');
-  const breadcrumb = container.querySelector('#library-breadcrumb');
+  const searchInput = container.querySelector('#topic-search');
+  const topicGrid = container.querySelector('#topic-grid');
+  const topicCount = container.querySelector('#topic-count');
+  const emptyMessage = container.querySelector('#empty-message');
   const backButton = container.querySelector('#library-back');
-  const searchInput = container.querySelector('#library-search');
-  const sectionTitle = container.querySelector('#premium-section-title');
-  const itemCount = container.querySelector('#premium-item-count');
+  const libraryTitle = container.querySelector('#library-title');
+  const breadcrumb = container.querySelector('#library-breadcrumb');
+  const lessonContent = container.querySelector('#lesson-content');
+  const errorMessage = container.querySelector('#library-error');
 
-  function cleanupCurrentVisual() {
-    cleanupLessonVisual();
-    cleanupLessonVisual = () => {};
+  function matches(item) {
+    return [
+      item.title,
+      item.category,
+      item.description
+    ].some(value =>
+      String(value || '').toLowerCase().includes(query)
+    );
   }
 
-  function matchesSearch(item) {
-    const text = [
-      item.title || '',
-      item.category || '',
-      item.description || ''
-    ].join(' ').toLowerCase();
+  // Same card structure as src/free.js
+  function createTopicCard(item, type) {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'topic-card';
+    card.dataset.type = type;
+    card.dataset.id = item.id;
 
-    return text.includes(searchTerm);
+    // Buttons need these styles to behave like Free links.
+    card.style.textAlign = 'left';
+    card.style.font = 'inherit';
+    card.style.color = 'inherit';
+    card.style.cursor = 'pointer';
+
+    const icon = document.createElement('div');
+    icon.className = 'topic-icon';
+    icon.textContent =
+      type === 'course' ? '∫' :
+      type === 'topic' ? '📘' : '📖';
+
+    const category = document.createElement('span');
+    category.className = 'topic-category';
+    category.textContent =
+      type === 'course' ? 'Premium Course' :
+      type === 'topic' ? 'Calculus Topic' : 'Premium Lesson';
+
+    const title = document.createElement('h3');
+    title.textContent = item.title || 'Untitled';
+
+    const description = document.createElement('p');
+    description.textContent = item.description || '';
+
+    const action = document.createElement('span');
+    action.className = 'topic-action';
+    action.textContent =
+      type === 'course' ? 'Explore Calculus →' :
+      type === 'topic' ? 'Explore Topic →' : 'Open Lesson →';
+
+    card.append(icon, category, title, description, action);
+    return card;
   }
 
-  function createCard(item, type) {
-    const icon =
-      type === 'course'
-        ? '∫'
-        : type === 'topic'
-          ? '📘'
-          : '📖';
+  function renderCards(items, type) {
+    const filtered = items.filter(matches);
 
-    const category =
-      type === 'course'
-        ? 'PREMIUM COURSE'
-        : type === 'topic'
-          ? 'CALCULUS TOPIC'
-          : 'PREMIUM LESSON';
+    topicGrid.replaceChildren(
+      ...filtered.map(item => createTopicCard(item, type))
+    );
 
-    const action =
-      type === 'course'
-        ? 'Explore Calculus →'
-        : type === 'topic'
-          ? 'Explore Topic →'
-          : 'Open Lesson →';
+    topicCount.textContent =
+      `${filtered.length} ${type}${filtered.length === 1 ? '' : 's'}`;
 
-    return `
-      <button
-        class="premium-library-card"
-        type="button"
-        data-type="${type}"
-        data-id="${escapeHTML(item.id)}"
-      >
-        <span class="premium-library-icon">
-          ${icon}
-        </span>
-
-        <span class="premium-library-card-text">
-          <span class="topic-category">
-            ${category}
-          </span>
-
-          <strong>
-            ${escapeHTML(item.title || 'Untitled')}
-          </strong>
-
-          <small>
-            ${escapeHTML(item.description || '')}
-          </small>
-        </span>
-
-        <span class="topic-action">
-          ${action}
-        </span>
-      </button>
-    `;
-  }
-
-  function makeCards(items, type) {
-    if (!items.length) {
-      return `
-        <div class="library-empty">
-          <h3>Nothing here yet</h3>
-          <p>
-            Content will appear here when it is added.
-          </p>
-        </div>
-      `;
-    }
-
-    return `
-      <div class="premium-library-grid">
-        ${items.map((item) =>
-          createCard(item, type)
-        ).join('')}
-      </div>
-    `;
-  }
-
-  function updateCount(count, label) {
-    itemCount.textContent =
-      count === 1
-        ? `1 ${label}`
-        : `${count} ${label}s`;
+    emptyMessage.hidden = filtered.length !== 0;
   }
 
   function render() {
     if (destroyed) return;
 
-    cleanupCurrentVisual();
+    cleanupVisual();
+    cleanupVisual = () => {};
 
-    backButton.hidden = currentView === 'courses';
-    searchInput.hidden = currentView === 'viewer';
+    topicGrid.replaceChildren();
+    lessonContent.replaceChildren();
 
-    if (currentView === 'courses') {
-      const courses = [calculusCourse].filter(matchesSearch);
+    backButton.hidden = view === 'courses';
+    searchInput.parentElement.hidden = view === 'viewer';
+    emptyMessage.hidden = true;
 
-      sectionTitle.textContent = 'Explore Premium Courses';
+    if (view === 'courses') {
+      libraryTitle.textContent = 'Explore Premium Courses';
       breadcrumb.textContent = '';
-      updateCount(courses.length, 'course');
+      renderCards([CALCULUS], 'course');
 
-      content.innerHTML = makeCards(courses, 'course');
-
-    } else if (currentView === 'topics') {
-      const matchingTopics = topics
-        .filter((topic) => topic.courseId === CALCULUS_ID)
-        .filter(matchesSearch);
-
-      sectionTitle.textContent = 'Calculus Topics';
+    } else if (view === 'topics') {
+      libraryTitle.textContent = 'Calculus Topics';
       breadcrumb.textContent = 'Calculus';
-      updateCount(matchingTopics.length, 'topic');
 
-      content.innerHTML = makeCards(
-        matchingTopics,
+      renderCards(
+        topics.filter(item => item.courseId === CALCULUS.id),
         'topic'
       );
 
-    } else if (currentView === 'lessons') {
-      const matchingLessons = lessons
-        .filter((lesson) =>
-          lesson.courseId === CALCULUS_ID &&
-          lesson.topicId === selectedTopic?.id
-        )
-        .filter(matchesSearch);
-
-      sectionTitle.textContent =
+    } else if (view === 'lessons') {
+      libraryTitle.textContent =
         selectedTopic?.title || 'Calculus Lessons';
 
       breadcrumb.textContent =
-        `Calculus / ${selectedTopic?.title || 'Topic'}`;
+        `Calculus / ${selectedTopic?.title || ''}`;
 
-      updateCount(matchingLessons.length, 'lesson');
-
-      content.innerHTML = makeCards(
-        matchingLessons,
+      renderCards(
+        lessons.filter(item =>
+          item.courseId === CALCULUS.id &&
+          item.topicId === selectedTopic?.id
+        ),
         'lesson'
       );
 
-    } else if (currentView === 'viewer') {
-      sectionTitle.textContent =
+    } else if (view === 'viewer') {
+      libraryTitle.textContent =
         selectedLesson?.title || 'Lesson';
 
       breadcrumb.textContent =
-        `Calculus / ${selectedTopic?.title || 'Topic'} / ${selectedLesson?.title || 'Lesson'}`;
+        `Calculus / ${selectedTopic?.title || ''} / ${selectedLesson?.title || ''}`;
 
-      itemCount.textContent = '';
+      topicCount.textContent = '';
+      topicGrid.hidden = true;
 
-      cleanupLessonVisual = renderLessonViewer(
-        content,
+      cleanupVisual = renderLessonViewer(
+        lessonContent,
         selectedLesson
       );
+    }
+
+    if (view !== 'viewer') {
+      topicGrid.hidden = false;
     }
   }
 
   function handleCardClick(event) {
-    if (destroyed) return;
-
-    const card = event.target.closest(
-      '[data-type][data-id]'
-    );
-
-    if (!card || !content.contains(card)) return;
+    const card = event.target.closest('[data-type][data-id]');
+    if (!card || !topicGrid.contains(card) || destroyed) return;
 
     const { type, id } = card.dataset;
 
     if (type === 'course') {
-      if (id !== CALCULUS_ID) return;
+      if (id !== CALCULUS.id) return;
 
+      view = 'topics';
       selectedTopic = null;
       selectedLesson = null;
-      currentView = 'topics';
 
     } else if (type === 'topic') {
-      selectedTopic = topics.find(
-        (topic) =>
-          topic.id === id &&
-          topic.courseId === CALCULUS_ID
+      selectedTopic = topics.find(item =>
+        item.id === id && item.courseId === CALCULUS.id
       );
 
       if (!selectedTopic) return;
-
       selectedLesson = null;
-      currentView = 'lessons';
+      view = 'lessons';
 
     } else if (type === 'lesson') {
-      selectedLesson = lessons.find(
-        (lesson) =>
-          lesson.id === id &&
-          lesson.courseId === CALCULUS_ID &&
-          lesson.topicId === selectedTopic?.id
+      selectedLesson = lessons.find(item =>
+        item.id === id &&
+        item.courseId === CALCULUS.id &&
+        item.topicId === selectedTopic?.id
       );
 
       if (!selectedLesson) return;
-
-      currentView = 'viewer';
-
-    } else {
-      return;
+      view = 'viewer';
     }
 
-    searchTerm = '';
+    query = '';
     searchInput.value = '';
-
     render();
   }
 
-  function handleBackClick() {
-    if (destroyed) return;
-
-    if (currentView === 'viewer') {
-      currentView = 'lessons';
+  function handleBack() {
+    if (view === 'viewer') {
+      view = 'lessons';
       selectedLesson = null;
-
-    } else if (currentView === 'lessons') {
-      currentView = 'topics';
+    } else if (view === 'lessons') {
+      view = 'topics';
       selectedTopic = null;
-
     } else {
-      currentView = 'courses';
-      selectedTopic = null;
-      selectedLesson = null;
+      view = 'courses';
     }
 
-    searchTerm = '';
+    query = '';
     searchInput.value = '';
-
     render();
   }
 
   function handleSearch() {
-    if (destroyed) return;
-
-    searchTerm = searchInput.value
-      .trim()
-      .toLowerCase();
-
+    query = searchInput.value.trim().toLowerCase();
     render();
   }
 
-  content.addEventListener('click', handleCardClick);
-  backButton.addEventListener('click', handleBackClick);
+  topicGrid.addEventListener('click', handleCardClick);
+  backButton.addEventListener('click', handleBack);
   searchInput.addEventListener('input', handleSearch);
 
   async function load() {
     try {
-      const results = await Promise.all([
+      const [topicSnapshot, lessonSnapshot] = await Promise.all([
         getDocs(collection(db, 'topics')),
         getDocs(collection(db, 'lessons'))
       ]);
 
       if (destroyed) return;
 
-      const convert = (snapshot) =>
-        snapshot.docs.map((document) => ({
-          ...document.data(),
-          id: document.id
-        }));
+      topics = topicSnapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id
+      }));
 
-      topics = convert(results[0]);
-      lessons = convert(results[1]);
+      lessons = lessonSnapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id
+      }));
 
       const byOrder = (a, b) =>
         (a.order ?? 0) - (b.order ?? 0);
 
       topics.sort(byOrder);
       lessons.sort(byOrder);
-
       render();
 
     } catch (error) {
       if (destroyed) return;
 
-      console.error(
-        'Premium library loading failed:',
-        error
-      );
-
-      /*
-        The Calculus course remains visible,
-        but its topics and lessons cannot be
-        loaded until Firestore access works.
-      */
-      topics = [];
-      lessons = [];
-
-      render();
-
-      const notice = document.createElement('p');
-      notice.className = 'empty-message';
-      notice.setAttribute('role', 'alert');
-      notice.textContent =
-        'Unable to load premium lesson data. Please check your Firestore permissions.';
-
-      content.append(notice);
+      console.error('Premium library error:', error);
+      errorMessage.textContent =
+        'Unable to load premium content. Check Firestore access.';
+      errorMessage.hidden = false;
     }
   }
 
-  // Show the Calculus course immediately.
   render();
-
-  // Load available Calculus topics and lessons.
   load();
 
   return {
     destroy() {
       if (destroyed) return;
-
       destroyed = true;
 
-      cleanupCurrentVisual();
+      cleanupVisual();
 
-      content.removeEventListener(
-        'click',
-        handleCardClick
-      );
-
-      backButton.removeEventListener(
-        'click',
-        handleBackClick
-      );
-
-      searchInput.removeEventListener(
-        'input',
-        handleSearch
-      );
+      topicGrid.removeEventListener('click', handleCardClick);
+      backButton.removeEventListener('click', handleBack);
+      searchInput.removeEventListener('input', handleSearch);
 
       container.replaceChildren();
-
-      topics = [];
-      lessons = [];
-      selectedTopic = null;
-      selectedLesson = null;
-      searchTerm = '';
     }
   };
 }
