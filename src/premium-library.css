@@ -1,0 +1,137 @@
+
+.premium-library {
+  margin-top: 36px;
+  padding: 30px;
+  background: #fff;
+  border: 1px solid #dbe4f0;
+  border-radius: 24px;
+  color: #102341;
+}
+
+.premium-library-heading h2 {
+  margin: 0 0 10px;
+  font-size: clamp(24px, 3vw, 32px);
+}
+
+.premium-library-heading p {
+  margin: 0;
+  color: #52647e;
+}
+
+.premium-library-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 26px 0 18px;
+}
+
+#library-search {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid #d4dfed;
+  border-radius: 12px;
+  background: #fff;
+  color: #102341;
+  font: inherit;
+}
+
+#library-search:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+#library-back {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  border: 1px solid #d4dfed;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #17365e;
+  font: inherit;
+  cursor: pointer;
+}
+
+#library-breadcrumb {
+  margin-bottom: 20px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.premium-library-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.premium-library-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 108px;
+  padding: 20px;
+  border: 1px solid #dbe4f0;
+  border-radius: 16px;
+  background: #fff;
+  color: #102341;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color .2s, transform .2s;
+}
+
+.premium-library-card:hover {
+  border-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.premium-library-icon {
+  font-size: 28px;
+  color: #2563eb;
+}
+
+.premium-library-card-text {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.premium-library-card-text strong {
+  font-size: 17px;
+}
+
+.premium-library-card-text small {
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.library-empty {
+  padding: 52px 20px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  text-align: center;
+  background: #f8fafc;
+}
+
+.library-empty h3 {
+  margin: 0 0 8px;
+}
+
+.library-empty p {
+  margin: 0;
+  color: #64748b;
+}
+
+@media (max-width: 640px) {
+  .premium-library {
+    padding: 20px;
+  }
+
+  .premium-library-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .premium-library-controls {
+    flex-wrap: wrap;
+  }
+}
