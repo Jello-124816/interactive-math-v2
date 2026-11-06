@@ -147,5 +147,123 @@ v &= ?
 \end{aligned}`
       }
     ]
-  }
+  },
+
+{
+  id: 'q03',
+  practiceId: 'sat-linear-equations',
+  difficulty: 'medium',
+  number: 'Q03',
+  type: 'Linear Equations — Word Problems',
+
+  blocks: [
+    {
+      type: 'text',
+      content: 'A museum rents tablets to visitors. The museum earns revenue of $14 for each tablet rented for the day. On Wednesday, the museum earned $406 in profit from renting tablets after paying daily expenses of $112. How many tablets did the museum rent on Wednesday? (profit = total revenue − total expenses)'
+    }
+  ],
+
+  solution: [
+    {
+      type: 'display-math',
+      content: String.raw`\begin{aligned}
+&\text{Revenue (1 tablet): }\$14\\
+&\text{Profit: }\$406\\
+&\text{Expenses: }\$112\\
+&\text{Tablets rented: }?\\
+&\text{Let the number of tablets rented be }x.
+\end{aligned}`
+    },
+    {
+      type: 'display-math',
+      content: String.raw`\begin{aligned}
+&\text{Revenue (x tablets)}=14x\\[12pt]
+&\text{Profit}=\text{Revenue}-\text{Expenses}\\[8pt]
+&406=14x-112\\
+&14x=406+112\\
+&14x=518\\
+&x=\frac{518}{14}\\
+&x=37
+\end{aligned}`
+    },
+    {
+      type: 'paragraph',
+      content: 'Answer: 37 tablets'
+    }
+  ]
+},
+
+
+
+{
+  id: 'q04',
+  practiceId: 'sat-linear-equations',
+  difficulty: 'medium',
+  number: 'Q04',
+  type: 'Linear Equations — Word Problems',
+
+  blocks: [
+    {
+      type: 'text',
+      content: 'A candle is made of 17 ounces of wax. When the candle is burning, the amount of wax in the candle decreases by 1 ounce every 4 hours. If 6 ounces of wax remain in this candle, for how many hours has it been burning?'
+    },
+    {
+      type: 'paragraph',
+      content: 'A. 3'
+    },
+    {
+      type: 'paragraph',
+      content: 'B. 6'
+    },
+    {
+      type: 'paragraph',
+      content: 'C. 24'
+    },
+    {
+      type: 'paragraph',
+      content: 'D. 44'
+    }
+  ],
+
+  solution: [
+    {
+      type: 'display-math',
+      content: String.raw`\begin{aligned}
+&\text{Initial wax: }17\text{ oz}\\
+&\text{Remaining wax: }6\text{ oz}\\
+&\text{Burn rate: 1 oz every 4 hours}\\
+&\text{Hours burned, }h=?
+\end{aligned}`
+    },
+    {
+      type: 'display-math',
+      content: String.raw`\begin{aligned}
+\text{Burn rate}
+&=-\frac{1\text{ oz}}{4\text{ hours}}\\[8pt]
+&=-\frac14\text{ oz/hour}
+\end{aligned}`
+    },
+    {
+      type: 'paragraph',
+      content: 'Use the linear equation f(x) = mx + b, where m is the rate of change and b is the initial value.'
+    },
+    {
+      type: 'display-math',
+      content: String.raw`\begin{aligned}
+\text{Remaining wax}&=(\text{Burn rate})(\text{Hours burned})+\text{Initial wax}\\[12pt]
+6&=-\frac14h+17\\[12pt]
+6-17&=-\frac14h\\[12pt]
+-11&=-\frac14h\\[12pt]
+h&=44
+\end{aligned}`
+    },
+    {
+      type: 'paragraph',
+      content: 'Answer: D. 44 hours'
+    }
+  ]
+}
+
+
+
 ];
