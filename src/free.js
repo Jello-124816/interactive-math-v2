@@ -461,6 +461,9 @@ function renderLibrary() {
     backButton.textContent = '← Back to Courses';
   }
 
+  coursesBackLink.style.display =
+    coursesBackLink.hidden ? 'none' : 'inline-flex';
+
   const filtered = items.filter(
     item => matchesSearch(item, searchQuery)
   );

@@ -368,9 +368,9 @@ b&=5
 
     solution: [
       {
-        type: 'svg',
-        src: 'solutions/Content to Model to Calculation-6-ready.svg',
-        alt: 'Step-by-step SVG solution for SAT Math Hard Q02'
+        type: 'pdf',
+        src: 'solutions/Content to Model to Calculation-6-ready.pdf',
+        title: 'SAT Algebra Hard Q02 Solution'
       }
     ]
   }
