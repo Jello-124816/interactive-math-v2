@@ -1,76 +1,182 @@
 
+/**
+ * Creates a card for courses, topics, SAT categories,
+ * and SAT practice sections.
+ *
+ * Main course cards have separate Free and Premium buttons.
+ */
+
 export function createCard(item, type, onNavigate) {
-  const isLink = Boolean(item.url);
-
-  const isNavigationCard =
-    type === 'course' ||
-    type === 'sat-category' ||
-    type === 'practice';
-
-  const card = document.createElement(
-    isLink ? 'a' : isNavigationCard ? 'button' : 'div'
-  );
-
+  const card = document.createElement('article');
   card.className = 'topic-card';
-
-  if (isLink) {
-    card.href = item.url;
-  } else if (isNavigationCard) {
-    card.type = 'button';
-    card.style.textAlign = 'left';
-    card.style.font = 'inherit';
-    card.style.color = 'inherit';
-    card.style.cursor = 'pointer';
-
-    card.addEventListener('click', () => {
-      onNavigate(type, item);
-    });
-  }
 
   const icon = document.createElement('div');
   icon.className = 'topic-icon';
-  icon.textContent = item.icon || '📝';
+  icon.textContent = item.icon || '📚';
 
   const category = document.createElement('span');
   category.className = 'topic-category';
   category.textContent = item.category || '';
 
   const title = document.createElement('h3');
-
-  if (item.title.endsWith('(Free)')) {
-    const mainTitle = document.createTextNode(
-      item.title.replace(/\s*\(Free\)$/, ' ')
-    );
-
-    const freeLabel = document.createElement('span');
-    freeLabel.textContent = '(Free)';
-    freeLabel.style.color = '#16a34a';
-    freeLabel.style.fontWeight = '700';
-
-    title.append(mainTitle, freeLabel);
-  } else {
-    title.textContent = item.title;
-  }
+  title.className = 'topic-title';
+  title.textContent = item.title;
 
   const description = document.createElement('p');
+  description.className = 'topic-description';
   description.textContent = item.description || '';
 
-  const action = document.createElement('span');
-  action.className = 'topic-action';
+  card.append(icon, category, title, description);
+
+  // -------------------------------------
+  // Main course cards
+  // -------------------------------------
 
   if (type === 'course') {
-    action.textContent = `Explore ${item.title} →`;
-  } else if (type === 'sat-category') {
-    action.textContent = 'Explore Practices →';
-  } else if (type === 'practice') {
-    action.textContent = 'Start Practice →';
-  } else if (isLink) {
-    action.textContent = 'Explore Interactive →';
-  } else {
-    action.textContent = 'Coming Soon';
+    const actions = document.createElement('div');
+    actions.className = 'course-access-actions';
+
+    Object.assign(actions.style, {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '12px',
+      marginTop: 'auto',
+      paddingTop: '18px'
+    });
+
+    // Free button
+    if (item.hasFree !== false) {
+      const freeButton = document.createElement('button');
+      freeButton.type = 'button';
+      freeButton.textContent = 'Free';
+
+      Object.assign(freeButton.style, {
+        flex: '1',
+        minWidth: '100px',
+        padding: '11px 16px',
+        backgroundColor: '#16a34a',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '9px',
+        fontFamily: 'inherit',
+        fontSize: '15px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s ease, transform 0.2s ease'
+      });
+
+      freeButton.addEventListener('mouseenter', () => {
+        freeButton.style.backgroundColor = '#15803d';
+        freeButton.style.transform = 'translateY(-2px)';
+      });
+
+      freeButton.addEventListener('mouseleave', () => {
+        freeButton.style.backgroundColor = '#16a34a';
+        freeButton.style.transform = 'translateY(0)';
+      });
+
+      freeButton.addEventListener('click', () => {
+        onNavigate('course', item);
+      });
+
+      actions.append(freeButton);
+    }
+
+    // Premium button
+    if (item.hasPremium !== false) {
+      const premiumButton = document.createElement('button');
+      premiumButton.type = 'button';
+      premiumButton.textContent = 'Premium';
+
+      Object.assign(premiumButton.style, {
+        flex: '1',
+        minWidth: '100px',
+        padding: '11px 16px',
+        backgroundColor: '#7c3aed',
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: '9px',
+        fontFamily: 'inherit',
+        fontSize: '15px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s ease, transform 0.2s ease'
+      });
+
+      premiumButton.addEventListener('mouseenter', () => {
+        premiumButton.style.backgroundColor = '#6d28d9';
+        premiumButton.style.transform = 'translateY(-2px)';
+      });
+
+      premiumButton.addEventListener('mouseleave', () => {
+        premiumButton.style.backgroundColor = '#7c3aed';
+        premiumButton.style.transform = 'translateY(0)';
+      });
+
+      premiumButton.addEventListener('click', () => {
+        onNavigate('premium', item);
+      });
+
+      actions.append(premiumButton);
+    }
+
+    card.append(actions);
+    return card;
   }
 
-  card.append(icon, category, title, description, action);
+  // -------------------------------------
+  // Topic, SAT category, and practice cards
+  // -------------------------------------
+
+  const exploreButton = document.createElement('button');
+  exploreButton.type = 'button';
+  exploreButton.className = 'topic-card-button';
+
+  // Updated button text
+  exploreButton.textContent = item.url
+    ? 'Open →'
+    : 'Explore →';
+
+  Object.assign(exploreButton.style, {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    alignSelf: 'flex-start',
+    marginTop: '18px',
+    padding: '11px 20px',
+    backgroundColor: '#2563eb',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '10px',
+    fontFamily: 'inherit',
+    fontSize: '15px',
+    fontWeight: '600',
+    lineHeight: '1.4',
+    textDecoration: 'none',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease, transform 0.2s ease'
+  });
+
+  exploreButton.addEventListener('mouseenter', () => {
+    exploreButton.style.backgroundColor = '#1d4ed8';
+    exploreButton.style.transform = 'translateY(-2px)';
+  });
+
+  exploreButton.addEventListener('mouseleave', () => {
+    exploreButton.style.backgroundColor = '#2563eb';
+    exploreButton.style.transform = 'translateY(0)';
+  });
+
+  exploreButton.addEventListener('click', () => {
+    if (item.url) {
+      window.location.href = item.url;
+    } else {
+      onNavigate(type, item);
+    }
+  });
+
+  card.append(exploreButton);
 
   return card;
 }

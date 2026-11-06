@@ -1,5 +1,9 @@
 
-import { initializeApp } from 'firebase/app';
+import {
+  initializeApp,
+  getApp,
+  getApps
+} from 'firebase/app';
 
 import {
   getAuth,
@@ -18,8 +22,10 @@ const firebaseConfig = {
   appId: '1:474014120871:web:779e2e7e502f4c8d495482'
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase once
+const app = getApps().length
+  ? getApp()
+  : initializeApp(firebaseConfig);
 
 // Firebase Authentication
 export const auth = getAuth(app);
@@ -27,7 +33,7 @@ export const auth = getAuth(app);
 // Google sign-in provider
 export const googleProvider = new GoogleAuthProvider();
 
-// Allow users to choose their Google account
+// Allow users to select their Google account
 googleProvider.setCustomParameters({
   prompt: 'select_account'
 });

@@ -437,3 +437,27 @@ h1 span {
     transition: none;
   }
 }
+/* Account page back navigation */
+
+.account-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+  color: #2563eb;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.account-back-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.account-back-link:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 4px;
+  border-radius: 4px;
+}

@@ -4,35 +4,52 @@ export function renderFreeLayout() {
   const app = document.querySelector('#app');
 
   if (!app) {
-    throw new Error('Free page requires an element with id="app".');
+    throw new Error('Explore page requires an element with id="app".');
   }
 
   app.innerHTML = `
     <header class="site-header">
       <div class="container header-inner">
-        <a href="${base}" class="brand">
-          <span class="logo-placeholder">∑</span>
-          <span class="brand-name">Interactive Mathematics</span>
+        <a href="${base}" class="brand" aria-label="Mathematics home">
+          <span class="logo-placeholder" aria-hidden="true">∑</span>
+          <span class="brand-name">Mathematics</span>
         </a>
 
-        <nav class="header-nav">
+        <nav class="header-nav" aria-label="Main navigation">
           <a href="${base}">Home</a>
-          <a href="${base}free.html" aria-current="page">Free</a>
-          <a href="${base}premium.html">Premium</a>
+          <a href="${base}free.html" aria-current="page">Explore</a>
+          <a href="${base}#about">About</a>
+          <a href="${base}account.html">Account</a>
         </nav>
       </div>
     </header>
 
     <main class="library-page container">
-      <a class="back-link" href="${base}">
+
+      <!-- Back to Home -->
+      <a
+        class="back-link"
+        href="${base}"
+        style="
+          display: inline-flex;
+          align-items: center;
+          color: #2563eb;
+          font-size: 16px;
+          font-weight: 700;
+          text-decoration: none;
+          cursor: pointer;
+          transition: color 0.2s ease;
+        "
+      >
         ← Back to Home
       </a>
 
       <div class="library-heading">
-        <h1>Free Interactive Mathematics</h1>
+        <h1>Explore Mathematics Courses</h1>
         <p>
-          Discover mathematics through interactive graphs,
-          diagrams, adjustable values, and SAT Math practice.
+          Learn mathematics through structured courses,
+          clear explanations, worked examples, and practice questions.
+          Prepare for standardized tests such as SAT Math and GED Math.
         </p>
       </div>
 
@@ -40,35 +57,38 @@ export function renderFreeLayout() {
         <label for="topic-search">
           Find a mathematics course or topic
         </label>
+
         <input
           id="topic-search"
           type="search"
-          placeholder="Search mathematics topics..."
+          placeholder="Search courses and topics..."
           autocomplete="off"
         />
       </div>
 
+      <!-- Back to Courses -->
       <button
         id="library-back"
         type="button"
         hidden
         style="
-          border: 0;
+          border: none;
           background: transparent;
           color: #2563eb;
-          font: inherit;
-          font-size: 14px;
-          font-weight: 650;
+          font-family: inherit;
+          font-size: 16px;
+          font-weight: 700;
           padding: 0;
           margin-bottom: 20px;
           cursor: pointer;
+          transition: color 0.2s ease;
         "
       >
         ← Back to Courses
       </button>
 
       <div class="library-summary">
-        <h2 id="library-title">Explore Free Courses</h2>
+        <h2 id="library-title">Explore Courses</h2>
         <span id="topic-count"></span>
       </div>
 
@@ -83,8 +103,8 @@ export function renderFreeLayout() {
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <span>Interactive Mathematics</span>
-        <span>Explore mathematics visually.</span>
+        <span>© ${new Date().getFullYear()} Mathematics</span>
+        <span>Learn. Practice. Understand.</span>
       </div>
     </footer>
   `;

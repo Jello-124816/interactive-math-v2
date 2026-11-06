@@ -10,6 +10,7 @@ export default defineConfig({
         main: resolve(import.meta.dirname, 'index.html'),
         free: resolve(import.meta.dirname, 'free.html'),
         premium: resolve(import.meta.dirname, 'premium.html'),
+        account: resolve(import.meta.dirname, 'account.html'),
         linear: resolve(import.meta.dirname, 'linear.html'),
         pythagorean: resolve(import.meta.dirname, 'pythagorean.html')
       }
