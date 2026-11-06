@@ -59,6 +59,7 @@ function renderPdfSolution(container, block) {
   const resetZoom = createControl('Reset', 'Reset zoom');
 
   const zoomLabel = document.createElement('span');
+
   zoomLabel.style.minWidth = '54px';
   zoomLabel.style.textAlign = 'center';
   zoomLabel.style.fontSize = '14px';
@@ -290,7 +291,9 @@ function renderPdfSolution(container, block) {
     }
 
     try {
-      const loadingTask = pdfjsLib.getDocument(pdfUrl);
+      const loadingTask = pdfjsLib.getDocument({
+        url: pdfUrl
+      });
 
       pdfDocument = await loadingTask.promise;
 
