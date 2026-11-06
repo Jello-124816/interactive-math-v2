@@ -114,6 +114,44 @@ function renderQuestionBlocks(container, blocks = []) {
 
       container.append(figure);
     }
+
+    else if (block.type === 'svg') {
+      endParagraph();
+
+      const figure = document.createElement('figure');
+      figure.className = 'sat-question-figure';
+
+      figure.style.margin = '20px 0';
+      figure.style.width = '100%';
+
+      const image = document.createElement('img');
+
+      const base = import.meta.env.BASE_URL;
+      const path = String(block.src ?? '')
+        .replace(/^\/+/, '')
+        .split('/')
+        .map(segment => encodeURIComponent(segment))
+        .join('/');
+
+      image.src = `${base}${path}`;
+      image.alt = block.alt || 'SAT Math SVG solution';
+      image.loading = 'lazy';
+
+      image.style.display = 'block';
+      image.style.width = '100%';
+      image.style.height = 'auto';
+      image.style.maxWidth = '100%';
+
+      figure.append(image);
+
+      if (block.caption) {
+        const caption = document.createElement('figcaption');
+        caption.textContent = block.caption;
+        figure.append(caption);
+      }
+
+      container.append(figure);
+    }
   });
 }
 
@@ -201,7 +239,6 @@ export function renderSatQuestion(container, questionId) {
   });
 
   container.append(backButton);
-
 
   // Typeset LaTeX after adding the question to the DOM.
   if (window.MathJax?.typesetPromise) {

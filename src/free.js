@@ -51,6 +51,7 @@ const originalDescription = pageDescription?.textContent || '';
 
 const backLinksRow = document.createElement('div');
 backLinksRow.className = 'library-back-links';
+
 backLinksRow.style.display = 'flex';
 backLinksRow.style.alignItems = 'center';
 backLinksRow.style.flexWrap = 'wrap';
@@ -65,7 +66,23 @@ backLinksRow.style.marginBottom = '20px';
 
 searchContainer.after(backLinksRow);
 
-backLinksRow.append(homeBackLink, backButton);
+const coursesBackLink = document.createElement('a');
+coursesBackLink.href = `${base}free.html`;
+coursesBackLink.textContent = '← Back to Courses';
+
+coursesBackLink.style.display = 'inline-flex';
+coursesBackLink.style.alignItems = 'center';
+coursesBackLink.style.color = '#2563eb';
+coursesBackLink.style.fontSize = '16px';
+coursesBackLink.style.fontWeight = '700';
+coursesBackLink.style.textDecoration = 'none';
+coursesBackLink.style.cursor = 'pointer';
+
+backLinksRow.append(
+  homeBackLink,
+  coursesBackLink,
+  backButton
+);
 
 homeBackLink.style.marginRight = '0';
 homeBackLink.style.marginBottom = '0';
@@ -208,6 +225,14 @@ async function openPremiumCourse(course) {
   }
 }
 
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'instant'
+  });
+}
+
 function handleCardNavigation(type, item) {
   if (type === 'premium') {
     openPremiumCourse(item);
@@ -236,6 +261,7 @@ function handleCardNavigation(type, item) {
 
   searchInput.value = '';
   renderLibrary();
+  scrollToTop();
 }
 
 function matchesSearch(item, query) {
@@ -272,6 +298,8 @@ function showQuestion(questionId) {
 
   backButton.hidden = false;
   backButton.textContent = '← Back to Questions';
+
+  scrollToTop();
 }
 
 function renderPractice() {
@@ -374,6 +402,7 @@ function renderLibrary() {
     libraryTitle.textContent = 'Explore Courses';
     libraryTitle.hidden = false;
 
+    coursesBackLink.hidden = true;
     backButton.hidden = true;
     backButton.textContent = '← Back to Courses';
 
@@ -387,6 +416,7 @@ function renderLibrary() {
       libraryTitle.textContent = 'SAT Math Practices';
       libraryTitle.hidden = false;
 
+      coursesBackLink.hidden = true;
       backButton.textContent = '← Back to Courses';
 
     } else {
@@ -405,6 +435,7 @@ function renderLibrary() {
 
       libraryTitle.hidden = true;
 
+      coursesBackLink.hidden = false;
       backButton.textContent =
         '← Back to SAT Math Practices';
     }
@@ -425,6 +456,7 @@ function renderLibrary() {
 
     libraryTitle.hidden = false;
 
+    coursesBackLink.hidden = true;
     backButton.hidden = false;
     backButton.textContent = '← Back to Courses';
   }
@@ -499,6 +531,7 @@ backButton.addEventListener('click', () => {
 
   searchInput.value = '';
   renderLibrary();
+  scrollToTop();
 });
 
 renderLibrary();

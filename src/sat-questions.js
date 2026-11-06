@@ -149,34 +149,34 @@ v &= ?
     ]
   },
 
-{
-  id: 'q03',
-  practiceId: 'sat-linear-equations',
-  difficulty: 'medium',
-  number: 'Q03',
-  type: 'Linear Equations — Word Problems',
+  {
+    id: 'q03',
+    practiceId: 'sat-linear-equations',
+    difficulty: 'medium',
+    number: 'Q03',
+    type: 'Linear Equations — Word Problems',
 
-  blocks: [
-    {
-      type: 'text',
-      content: 'A museum rents tablets to visitors. The museum earns revenue of $14 for each tablet rented for the day. On Wednesday, the museum earned $406 in profit from renting tablets after paying daily expenses of $112. How many tablets did the museum rent on Wednesday? (profit = total revenue − total expenses)'
-    }
-  ],
+    blocks: [
+      {
+        type: 'text',
+        content: 'A museum rents tablets to visitors. The museum earns revenue of $14 for each tablet rented for the day. On Wednesday, the museum earned $406 in profit from renting tablets after paying daily expenses of $112. How many tablets did the museum rent on Wednesday? (profit = total revenue − total expenses)'
+      }
+    ],
 
-  solution: [
-    {
-      type: 'display-math',
-      content: String.raw`\begin{aligned}
+    solution: [
+      {
+        type: 'display-math',
+        content: String.raw`\begin{aligned}
 &\text{Revenue (1 tablet): }\$14\\
 &\text{Profit: }\$406\\
 &\text{Expenses: }\$112\\
 &\text{Tablets rented: }?\\
 &\text{Let the number of tablets rented be }x.
 \end{aligned}`
-    },
-    {
-      type: 'display-math',
-      content: String.raw`\begin{aligned}
+      },
+      {
+        type: 'display-math',
+        content: String.raw`\begin{aligned}
 &\text{Revenue (x tablets)}=14x\\[12pt]
 &\text{Profit}=\text{Revenue}-\text{Expenses}\\[8pt]
 &406=14x-112\\
@@ -185,107 +185,105 @@ v &= ?
 &x=\frac{518}{14}\\
 &x=37
 \end{aligned}`
-    },
-    {
-      type: 'paragraph',
-      content: 'Answer: 37 tablets'
-    }
-  ]
-},
+      },
+      {
+        type: 'paragraph',
+        content: 'Answer: 37 tablets'
+      }
+    ]
+  },
 
+  {
+    id: 'q04',
+    practiceId: 'sat-linear-equations',
+    difficulty: 'medium',
+    number: 'Q04',
+    type: 'Linear Equations — Word Problems',
 
+    blocks: [
+      {
+        type: 'text',
+        content: 'A candle is made of 17 ounces of wax. When the candle is burning, the amount of wax in the candle decreases by 1 ounce every 4 hours. If 6 ounces of wax remain in this candle, for how many hours has it been burning?'
+      },
+      {
+        type: 'paragraph',
+        content: 'A. 3'
+      },
+      {
+        type: 'paragraph',
+        content: 'B. 6'
+      },
+      {
+        type: 'paragraph',
+        content: 'C. 24'
+      },
+      {
+        type: 'paragraph',
+        content: 'D. 44'
+      }
+    ],
 
-{
-  id: 'q04',
-  practiceId: 'sat-linear-equations',
-  difficulty: 'medium',
-  number: 'Q04',
-  type: 'Linear Equations — Word Problems',
-
-  blocks: [
-    {
-      type: 'text',
-      content: 'A candle is made of 17 ounces of wax. When the candle is burning, the amount of wax in the candle decreases by 1 ounce every 4 hours. If 6 ounces of wax remain in this candle, for how many hours has it been burning?'
-    },
-    {
-      type: 'paragraph',
-      content: 'A. 3'
-    },
-    {
-      type: 'paragraph',
-      content: 'B. 6'
-    },
-    {
-      type: 'paragraph',
-      content: 'C. 24'
-    },
-    {
-      type: 'paragraph',
-      content: 'D. 44'
-    }
-  ],
-
-  solution: [
-    {
-      type: 'display-math',
-      content: String.raw`\begin{aligned}
+    solution: [
+      {
+        type: 'display-math',
+        content: String.raw`\begin{aligned}
 &\text{Initial wax: }17\text{ oz}\\
 &\text{Remaining wax: }6\text{ oz}\\
 &\text{Burn rate: 1 oz every 4 hours}\\
 &\text{Hours burned, }h=?
 \end{aligned}`
-    },
-    {
-      type: 'display-math',
-      content: String.raw`\begin{aligned}
+      },
+      {
+        type: 'display-math',
+        content: String.raw`\begin{aligned}
 \text{Burn rate}
 &=-\frac{1\text{ oz}}{4\text{ hours}}\\[8pt]
 &=-\frac14\text{ oz/hour}
 \end{aligned}`
-    },
-    {
-      type: 'paragraph',
-      content: 'Use the linear equation f(x) = mx + b, where m is the rate of change and b is the initial value.'
-    },
-    {
-      type: 'display-math',
-      content: String.raw`\begin{aligned}
+      },
+      {
+        type: 'paragraph',
+        content: 'Use the linear equation f(x) = mx + b, where m is the rate of change and b is the initial value.'
+      },
+      {
+        type: 'display-math',
+        content: String.raw`\begin{aligned}
 \text{Remaining wax}&=(\text{Burn rate})(\text{Hours burned})+\text{Initial wax}\\[12pt]
 6&=-\frac14h+17\\[12pt]
 6-17&=-\frac14h\\[12pt]
 -11&=-\frac14h\\[12pt]
 h&=44
 \end{aligned}`
-    },
-    {
-      type: 'paragraph',
-      content: 'Answer: D. 44 hours'
-    }
-  ]
-},
+      },
+      {
+        type: 'paragraph',
+        content: 'Answer: D. 44 hours'
+      }
+    ]
+  },
 
-{
-  id: 'q05',
-  practiceId: 'sat-linear-equations',
-  difficulty: 'hard',
-  number: 'Q01',
-  type: 'Linear Equations — Systems of Equations',
+  {
+    id: 'q05',
+    practiceId: 'sat-linear-equations',
+    difficulty: 'hard',
+    number: 'Q01',
+    type: 'Linear Equations — Systems of Equations',
 
-  blocks: [
-    {
-      type: 'text',
-      content: 'Store A sells raspberries for $5.50 per pint and blackberries for $3.00 per pint. Store B sells raspberries for $6.50 per pint and blackberries for $8.00 per pint. A certain purchase of raspberries and blackberries would cost $37.00 at Store A or $66.00 at Store B. How many pints of blackberries are in this purchase?'
-    },
-    { type: 'paragraph', content: 'A. 4' },
-    { type: 'paragraph', content: 'B. 5' },
-    { type: 'paragraph', content: 'C. 8' },
-    { type: 'paragraph', content: 'D. 12' }
-  ],
+    blocks: [
+      {
+        type: 'text',
+        content: 'Store A sells raspberries for $5.50 per pint and blackberries for $3.00 per pint. Store B sells raspberries for $6.50 per pint and blackberries for $8.00 per pint. A certain purchase of raspberries and blackberries would cost $37.00 at Store A or $66.00 at Store B. How many pints of blackberries are in this purchase?'
+      },
+      { type: 'paragraph', content: 'A. 4' },
+      { type: 'paragraph', content: 'B. 5' },
+      { type: 'paragraph', content: 'C. 8' },
+      { type: 'paragraph', content: 'D. 12' }
+    ],
 
-  solution: [
-    {
-      type: 'display-math',
-      content: String.raw`\begin{aligned}
+    solution: [
+      {
+        type: 'display-math',
+        content: String.raw`\begin{aligned}
 &\text{Let}\\
 &r=\text{pints of raspberries}\\
 &b=\text{pints of blackberries}\\[8pt]
@@ -299,34 +297,34 @@ h&=44
 &\text{Total: }\$66\\[8pt]
 &b=?
 \end{aligned}`
-    },
-    {
-      type: 'display-math',
-      content: String.raw`\begin{aligned}
+      },
+      {
+        type: 'display-math',
+        content: String.raw`\begin{aligned}
 \text{Store A:}\quad 5.5r+3b&=37\quad (1)\\
 \text{Store B:}\quad 6.5r+8b&=66\quad (2)
 \end{aligned}`
-    },
-    {
-      type: 'paragraph',
-      content: 'Subtract equation (1) from equation (2):'
-    },
-    {
-      type: 'display-math',
-      content: String.raw`\begin{aligned}
+      },
+      {
+        type: 'paragraph',
+        content: 'Subtract equation (1) from equation (2):'
+      },
+      {
+        type: 'display-math',
+        content: String.raw`\begin{aligned}
 (6.5r+8b)-(5.5r+3b)&=66-37\\
 6.5r-5.5r+8b-3b&=29\\
 r+5b&=29\\
 r&=29-5b
 \end{aligned}`
-    },
-    {
-      type: 'paragraph',
-      content: 'Substitute into equation (1):'
-    },
-    {
-      type: 'display-math',
-      content: String.raw`\begin{aligned}
+      },
+      {
+        type: 'paragraph',
+        content: 'Substitute into equation (1):'
+      },
+      {
+        type: 'display-math',
+        content: String.raw`\begin{aligned}
 5.5r+3b&=37\\
 5.5(29-5b)+3b&=37\\
 159.5-27.5b+3b&=37\\
@@ -334,15 +332,46 @@ r&=29-5b
 -24.5b&=-122.5\\
 b&=5
 \end{aligned}`
-    },
-    {
-      type: 'paragraph',
-      content: 'Answer: B. 5 pints of blackberries'
-    }
-  ]
-}
+      },
+      {
+        type: 'paragraph',
+        content: 'Answer: B. 5 pints of blackberries'
+      }
+    ]
+  },
 
+  {
+    id: 'q06',
+    practiceId: 'sat-linear-equations',
+    difficulty: 'hard',
+    number: 'Q02',
+    type: 'Linear Equations — Rate of Change',
 
+    blocks: [
+      {
+        type: 'text',
+        content: 'The function'
+      },
+      {
+        type: 'math',
+        content: String.raw`F(x)=\frac95(x-273.15)+32`
+      },
+      {
+        type: 'text',
+        content: 'gives the temperature, in degrees Fahrenheit, that corresponds to a temperature of x kelvins. If a temperature increased by 2.10 kelvins, by how much did the temperature increase, in degrees Fahrenheit?'
+      },
+      { type: 'paragraph', content: 'A. 3.78' },
+      { type: 'paragraph', content: 'B. 35.78' },
+      { type: 'paragraph', content: 'C. 487.89' },
+      { type: 'paragraph', content: 'D. 519.89' }
+    ],
 
-
+    solution: [
+      {
+        type: 'svg',
+        src: 'solutions/Content to Model to Calculation-6-ready.svg',
+        alt: 'Step-by-step SVG solution for SAT Math Hard Q02'
+      }
+    ]
+  }
 ];
