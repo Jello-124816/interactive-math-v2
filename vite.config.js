@@ -12,7 +12,8 @@ export default defineConfig({
         premium: resolve(import.meta.dirname, 'premium.html'),
         account: resolve(import.meta.dirname, 'account.html'),
         linear: resolve(import.meta.dirname, 'linear.html'),
-        pythagorean: resolve(import.meta.dirname, 'pythagorean.html')
+        pythagorean: resolve(import.meta.dirname, 'pythagorean.html'),
+        satPractice: resolve(import.meta.dirname, 'sat-practice.html')
       }
     }
   }

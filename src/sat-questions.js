@@ -262,7 +262,86 @@ h&=44
       content: 'Answer: D. 44 hours'
     }
   ]
+},
+
+{
+  id: 'q05',
+  practiceId: 'sat-linear-equations',
+  difficulty: 'hard',
+  number: 'Q01',
+  type: 'Linear Equations — Systems of Equations',
+
+  blocks: [
+    {
+      type: 'text',
+      content: 'Store A sells raspberries for $5.50 per pint and blackberries for $3.00 per pint. Store B sells raspberries for $6.50 per pint and blackberries for $8.00 per pint. A certain purchase of raspberries and blackberries would cost $37.00 at Store A or $66.00 at Store B. How many pints of blackberries are in this purchase?'
+    },
+    { type: 'paragraph', content: 'A. 4' },
+    { type: 'paragraph', content: 'B. 5' },
+    { type: 'paragraph', content: 'C. 8' },
+    { type: 'paragraph', content: 'D. 12' }
+  ],
+
+  solution: [
+    {
+      type: 'display-math',
+      content: String.raw`\begin{aligned}
+&\text{Let}\\
+&r=\text{pints of raspberries}\\
+&b=\text{pints of blackberries}\\[8pt]
+&\text{Store A:}\\
+&\text{Raspberries: }\$5.50/\text{pint}\\
+&\text{Blackberries: }\$3.00/\text{pint}\\
+&\text{Total: }\$37\\[8pt]
+&\text{Store B:}\\
+&\text{Raspberries: }\$6.50/\text{pint}\\
+&\text{Blackberries: }\$8.00/\text{pint}\\
+&\text{Total: }\$66\\[8pt]
+&b=?
+\end{aligned}`
+    },
+    {
+      type: 'display-math',
+      content: String.raw`\begin{aligned}
+\text{Store A:}\quad 5.5r+3b&=37\quad (1)\\
+\text{Store B:}\quad 6.5r+8b&=66\quad (2)
+\end{aligned}`
+    },
+    {
+      type: 'paragraph',
+      content: 'Subtract equation (1) from equation (2):'
+    },
+    {
+      type: 'display-math',
+      content: String.raw`\begin{aligned}
+(6.5r+8b)-(5.5r+3b)&=66-37\\
+6.5r-5.5r+8b-3b&=29\\
+r+5b&=29\\
+r&=29-5b
+\end{aligned}`
+    },
+    {
+      type: 'paragraph',
+      content: 'Substitute into equation (1):'
+    },
+    {
+      type: 'display-math',
+      content: String.raw`\begin{aligned}
+5.5r+3b&=37\\
+5.5(29-5b)+3b&=37\\
+159.5-27.5b+3b&=37\\
+159.5-24.5b&=37\\
+-24.5b&=-122.5\\
+b&=5
+\end{aligned}`
+    },
+    {
+      type: 'paragraph',
+      content: 'Answer: B. 5 pints of blackberries'
+    }
+  ]
 }
+
 
 
 

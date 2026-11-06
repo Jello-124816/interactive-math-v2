@@ -30,12 +30,7 @@ import { renderSatQuestionPage } from './components/sat-question-page.js';
 
 const base = import.meta.env.BASE_URL;
 
-// Create the Free Library page.
 renderFreeLayout();
-
-// -------------------------------------
-// Page elements
-// -------------------------------------
 
 const searchInput = document.querySelector('#topic-search');
 const searchContainer = document.querySelector('.library-search');
@@ -47,9 +42,41 @@ const libraryTitle = document.querySelector('#library-title');
 const practiceView = document.querySelector('#practice-view');
 const librarySummary = document.querySelector('.library-summary');
 
-// -------------------------------------
-// Navigation state
-// -------------------------------------
+const pageHeading = document.querySelector('.library-heading h1');
+const pageDescription = document.querySelector('.library-heading p');
+const homeBackLink = document.querySelector('.back-link');
+
+const originalHeading = pageHeading?.textContent || '';
+const originalDescription = pageDescription?.textContent || '';
+
+const backLinksRow = document.createElement('div');
+backLinksRow.className = 'library-back-links';
+backLinksRow.style.display = 'flex';
+backLinksRow.style.alignItems = 'center';
+backLinksRow.style.flexWrap = 'wrap';
+backLinksRow.style.columnGap = '22px';
+backLinksRow.style.rowGap = '8px';
+backLinksRow.style.position = 'sticky';
+backLinksRow.style.top = '12px';
+backLinksRow.style.zIndex = '20';
+backLinksRow.style.background = '#f5f7fb';
+backLinksRow.style.padding = '8px 0';
+backLinksRow.style.marginBottom = '20px';
+
+searchContainer.after(backLinksRow);
+
+backLinksRow.append(homeBackLink, backButton);
+
+homeBackLink.style.marginRight = '0';
+homeBackLink.style.marginBottom = '0';
+homeBackLink.style.position = 'static';
+homeBackLink.style.top = '';
+homeBackLink.style.zIndex = '';
+homeBackLink.style.background = '';
+homeBackLink.style.padding = '0';
+
+backButton.style.marginBottom = '0';
+backButton.style.verticalAlign = '';
 
 let currentCourse = null;
 let currentSatCategory = null;
@@ -59,7 +86,24 @@ let currentQuestion = null;
 
 let premiumCheckInProgress = false;
 
-// Wait until Firebase has determined the current user.
+const urlParams = new URLSearchParams(window.location.search);
+
+const requestedCourse = urlParams.get('course');
+const requestedCategory = urlParams.get('category');
+
+if (requestedCourse === 'sat-math') {
+  currentCourse = 'sat-math';
+
+  if (
+    requestedCategory &&
+    satCategories.some(
+      item => item.id === requestedCategory
+    )
+  ) {
+    currentSatCategory = requestedCategory;
+  }
+}
+
 const authReady = new Promise((resolve) => {
   const unsubscribe = onAuthStateChanged(
     auth,
@@ -73,10 +117,6 @@ const authReady = new Promise((resolve) => {
     }
   );
 });
-
-// -------------------------------------
-// Course-specific Premium access
-// -------------------------------------
 
 async function openPremiumCourse(course) {
   if (premiumCheckInProgress) return;
@@ -99,7 +139,6 @@ async function openPremiumCourse(course) {
 
     const user = auth.currentUser;
 
-    // Sign-in is required.
     if (!user) {
       const goToAccount = window.confirm(
         'Please sign in with Google to access Premium mathematics courses.\n\n' +
@@ -113,7 +152,6 @@ async function openPremiumCourse(course) {
       return;
     }
 
-    // Check the user's Firestore profile.
     const userReference = doc(
       db,
       'users',
@@ -141,7 +179,6 @@ async function openPremiumCourse(course) {
         ? userData.approvedCourses
         : {};
 
-    // Approval must match the clicked course.
     const approved =
       isAdmin ||
       approvedCourses[course.id] === true;
@@ -155,7 +192,6 @@ async function openPremiumCourse(course) {
       return;
     }
 
-    // Open only the approved Premium course.
     window.location.href =
       `${base}premium.html?course=${encodeURIComponent(course.id)}`;
 
@@ -171,10 +207,6 @@ async function openPremiumCourse(course) {
     premiumCheckInProgress = false;
   }
 }
-
-// -------------------------------------
-// Course and category navigation
-// -------------------------------------
 
 function handleCardNavigation(type, item) {
   if (type === 'premium') {
@@ -196,18 +228,15 @@ function handleCardNavigation(type, item) {
     currentQuestion = null;
 
   } else if (type === 'practice') {
-    currentPractice = item.id;
-    currentDifficulty = 'easy';
-    currentQuestion = null;
+    window.location.href =
+      `${base}sat-practice.html?practice=${encodeURIComponent(item.id)}`;
+
+    return;
   }
 
   searchInput.value = '';
   renderLibrary();
 }
-
-// -------------------------------------
-// Search
-// -------------------------------------
 
 function matchesSearch(item, query) {
   const normalized = query.trim().toLowerCase();
@@ -222,10 +251,6 @@ function matchesSearch(item, query) {
       .includes(normalized)
   );
 }
-
-// -------------------------------------
-// Individual SAT question
-// -------------------------------------
 
 function showQuestion(questionId) {
   const success = renderSatQuestionPage({
@@ -249,13 +274,9 @@ function showQuestion(questionId) {
   backButton.textContent = '← Back to Questions';
 }
 
-// -------------------------------------
-// SAT practice page
-// -------------------------------------
-
 function renderPractice() {
   const practice = satPractices.find(
-    (item) => item.id === currentPractice
+    item => item.id === currentPractice
   );
 
   if (!practice) {
@@ -295,11 +316,42 @@ function renderPractice() {
   });
 }
 
-// -------------------------------------
-// Free course library
-// -------------------------------------
+function updatePageIntroduction() {
+  if (!pageHeading || !pageDescription) return;
+
+  if (
+    currentCourse === 'sat-math' &&
+    currentSatCategory !== null
+  ) {
+    const selectedCategory = satCategories.find(
+      item => item.id === currentSatCategory
+    );
+
+    pageHeading.textContent =
+      selectedCategory?.title || 'SAT Math Practices';
+
+    pageDescription.hidden = true;
+
+  } else if (currentCourse === 'sat-math') {
+    pageHeading.textContent = 'SAT Math Practice & Preparation';
+
+    pageDescription.textContent =
+      'Practice SAT Math with topic-based questions organized by difficulty. ' +
+      'Strengthen your problem-solving skills through clear, step-by-step ' +
+      'solutions and prepare confidently for the Digital SAT.';
+
+    pageDescription.hidden = false;
+
+  } else {
+    pageHeading.textContent = originalHeading;
+    pageDescription.textContent = originalDescription;
+    pageDescription.hidden = false;
+  }
+}
 
 function renderLibrary() {
+  updatePageIntroduction();
+
   if (currentPractice !== null) {
     renderPractice();
     return;
@@ -320,6 +372,7 @@ function renderLibrary() {
     type = 'course';
 
     libraryTitle.textContent = 'Explore Courses';
+    libraryTitle.hidden = false;
 
     backButton.hidden = true;
     backButton.textContent = '← Back to Courses';
@@ -332,21 +385,25 @@ function renderLibrary() {
       type = 'sat-category';
 
       libraryTitle.textContent = 'SAT Math Practices';
+      libraryTitle.hidden = false;
+
       backButton.textContent = '← Back to Courses';
 
     } else {
       items = satPractices.filter(
-        (item) => item.categoryId === currentSatCategory
+        item => item.categoryId === currentSatCategory
       );
 
       type = 'practice';
 
       const selectedCategory = satCategories.find(
-        (item) => item.id === currentSatCategory
+        item => item.id === currentSatCategory
       );
 
       libraryTitle.textContent =
         selectedCategory?.title || 'SAT Math Practices';
+
+      libraryTitle.hidden = true;
 
       backButton.textContent =
         '← Back to SAT Math Practices';
@@ -354,28 +411,30 @@ function renderLibrary() {
 
   } else {
     items = interactiveTopics.filter(
-      (item) => item.courseId === currentCourse
+      item => item.courseId === currentCourse
     );
 
     type = 'topic';
 
     const course = freeCourses.find(
-      (item) => item.id === currentCourse
+      item => item.id === currentCourse
     );
 
     libraryTitle.textContent =
       `${course?.title || 'Mathematics'} Topics`;
+
+    libraryTitle.hidden = false;
 
     backButton.hidden = false;
     backButton.textContent = '← Back to Courses';
   }
 
   const filtered = items.filter(
-    (item) => matchesSearch(item, searchQuery)
+    item => matchesSearch(item, searchQuery)
   );
 
   topicGrid.replaceChildren(
-    ...filtered.map((item) =>
+    ...filtered.map(item =>
       createCard(item, type, handleCardNavigation)
     )
   );
@@ -418,10 +477,6 @@ function renderLibrary() {
   }
 }
 
-// -------------------------------------
-// Event listeners
-// -------------------------------------
-
 searchInput.addEventListener('input', renderLibrary);
 
 backButton.addEventListener('click', () => {
@@ -445,9 +500,5 @@ backButton.addEventListener('click', () => {
   searchInput.value = '';
   renderLibrary();
 });
-
-// -------------------------------------
-// Start the Free Library
-// -------------------------------------
 
 renderLibrary();

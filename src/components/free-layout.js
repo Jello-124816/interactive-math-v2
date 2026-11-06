@@ -54,14 +54,11 @@ export function renderFreeLayout() {
       </div>
 
       <div class="library-search">
-        <label for="topic-search">
-          Find a mathematics course or topic
-        </label>
-
         <input
           id="topic-search"
           type="search"
           placeholder="Search courses and topics..."
+          aria-label="Search courses and topics"
           autocomplete="off"
         />
       </div>
