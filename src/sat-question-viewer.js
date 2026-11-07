@@ -17,6 +17,24 @@ function getSolutionFileUrl(src) {
   return `${base}${path}`;
 }
 
+async function typesetMath(container) {
+  try {
+    if (!window.MathJax) return;
+
+    if (window.MathJax.startup?.promise) {
+      await window.MathJax.startup.promise;
+    }
+
+    if (!container.isConnected) return;
+
+    if (typeof window.MathJax.typesetPromise === 'function') {
+      await window.MathJax.typesetPromise([container]);
+    }
+  } catch (error) {
+    console.error('MathJax rendering error:', error);
+  }
+}
+
 function renderPdfSolution(container, block) {
   const wrapper = document.createElement('div');
   wrapper.className = 'sat-solution-pdf';
@@ -115,6 +133,7 @@ function renderPdfSolution(container, block) {
   const pdfUrl = getSolutionFileUrl(block.src);
 
   let pdfDocument = null;
+  let loadingPromise = null;
   let zoom = 1;
   let renderVersion = 0;
   let activeTasks = [];
@@ -267,7 +286,10 @@ function renderPdfSolution(container, block) {
     zoom = newZoom;
 
     updateZoomControls();
-    renderPages();
+
+    if (pdfDocument) {
+      renderPages();
+    }
   }
 
   zoomOut.addEventListener('click', () => {
@@ -290,21 +312,35 @@ function renderPdfSolution(container, block) {
       return;
     }
 
-    try {
-      const loadingTask = pdfjsLib.getDocument({
-        url: pdfUrl
-      });
-
-      pdfDocument = await loadingTask.promise;
-
-      renderPages();
-
-    } catch (error) {
-      console.error('PDF loading error:', error);
-
-      status.textContent =
-        'Unable to load the PDF solution. Please check the file.';
+    if (loadingPromise) {
+      return;
     }
+
+    loadingPromise = (async () => {
+      try {
+        const loadingTask = pdfjsLib.getDocument({
+          url: pdfUrl
+        });
+
+        pdfDocument = await loadingTask.promise;
+
+        const details = wrapper.closest('details');
+
+        if (!details || details.open) {
+          renderPages();
+        }
+
+      } catch (error) {
+        console.error('PDF loading error:', error);
+
+        status.textContent =
+          'Unable to load the PDF solution. Please check the file.';
+      } finally {
+        loadingPromise = null;
+      }
+    })();
+
+    await loadingPromise;
   }
 
   const details = container.closest('details');
@@ -332,10 +368,6 @@ function renderPdfSolution(container, block) {
   }
 }
 
-/**
- * Render question content while preserving natural
- * paragraph flow and inline mathematical expressions.
- */
 function renderQuestionBlocks(container, blocks = []) {
   let paragraph = null;
 
@@ -482,12 +514,6 @@ function renderQuestionBlocks(container, blocks = []) {
   });
 }
 
-/**
- * Render the selected SAT question.
- *
- * @param {HTMLElement} container
- * @param {string} questionId
- */
 export function renderSatQuestion(container, questionId) {
   const question = satQuestions.find(
     item => item.id === questionId
@@ -518,6 +544,13 @@ export function renderSatQuestion(container, questionId) {
   const solutionContent = document.createElement('div');
   solutionContent.className = 'sat-solution-content';
 
+  solutionDetails.append(
+    solutionSummary,
+    solutionContent
+  );
+
+  container.append(solutionDetails);
+
   if (
     Array.isArray(question.solution) &&
     question.solution.length > 0
@@ -534,12 +567,11 @@ export function renderSatQuestion(container, questionId) {
     solutionContent.append(placeholder);
   }
 
-  solutionDetails.append(
-    solutionSummary,
-    solutionContent
-  );
-
-  container.append(solutionDetails);
+  solutionDetails.addEventListener('toggle', () => {
+    if (solutionDetails.open) {
+      typesetMath(solutionContent);
+    }
+  });
 
   const backButton = document.createElement('button');
   backButton.type = 'button';
@@ -565,9 +597,5 @@ export function renderSatQuestion(container, questionId) {
 
   container.append(backButton);
 
-  if (window.MathJax?.typesetPromise) {
-    window.MathJax.typesetPromise([container]).catch(error => {
-      console.error('MathJax rendering error:', error);
-    });
-  }
+  typesetMath(content);
 }

@@ -1,10 +1,10 @@
 
 export const satQuestions = [
   {
-    id: 'q01',
+    id: 'E001',
     practiceId: 'sat-linear-equations',
     difficulty: 'easy',
-    number: 'Q01',
+    number: 'E001',
     type: 'Linear Equations — Rearranging a Formula',
 
     blocks: [
@@ -24,35 +24,18 @@ export const satQuestions = [
 
     solution: [
       {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-h &= \frac{9(v-273.15)}{5}+32\\
-h &= 467.33\\
-v &= ?
-\end{aligned}`
-      },
-      {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-467.33 &= \frac{9(v-273.15)}{5}+32\\[8pt]
-467.33-32 &= \frac{9(v-273.15)}{5}\\[8pt]
-435.33 &= \frac{9(v-273.15)}{5}\\[8pt]
-435.33(5) &= 9(v-273.15)\\[8pt]
-2176.65 &= 9(v-273.15)\\[8pt]
-\frac{2176.65}{9} &= v-273.15\\[8pt]
-241.85 &= v-273.15\\[8pt]
-241.85+273.15 &= v\\[8pt]
-515 &= v
-\end{aligned}`
+        type: 'pdf',
+        src: 'solutions/SAT-E-Sol-01.pdf',
+        title: 'SAT Algebra Easy E001 Solution'
       }
     ]
   },
 
   {
-    id: 'q02',
+    id: 'M001',
     practiceId: 'sat-linear-equations',
     difficulty: 'medium',
-    number: 'Q01',
+    number: 'M001',
     type: 'Linear Equations — Word Problems',
 
     blocks: [
@@ -80,40 +63,18 @@ v &= ?
 
     solution: [
       {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-&\text{Ice cream: }4\text{ cups}\\
-&\text{Bananas: }2\\
-&\text{Total calcium: }1114\text{ mg}\\
-&\text{Calcium (1 ice cream): }276\text{ mg}\\
-&\text{Calcium (1 banana): }?
-\end{aligned}`
-      },
-      {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-&\text{Calcium (4 ice cream)}=4(276)=1104\text{ mg}\\[12pt]
-&\text{Total calcium}=\text{Calcium (4 ice cream)}\\
-&\qquad+\text{Calcium (2 bananas)}\\[12pt]
-&\text{Calcium (2 bananas)}\\
-&\qquad=\text{Total calcium}-\text{Calcium (ice cream)}\\
-&\qquad=1114-1104\\
-&\qquad=10\text{ mg}\\[12pt]
-&\text{Calcium (1 banana)}=\frac{10}{2}=5\text{ mg}
-\end{aligned}`
-      },
-      {
-        type: 'paragraph',
-        content: 'Answer: A. 5'
+        type: 'pdf',
+        src: 'solutions/SAT-M-Sol-01.pdf',
+        title: 'SAT Algebra Medium Q01 Solution'
       }
     ]
   },
 
   {
-    id: 'q03',
+    id: 'M002',
     practiceId: 'sat-linear-equations',
     difficulty: 'medium',
-    number: 'Q02',
+    number: 'M002',
     type: 'Linear Equations — Word Problems',
 
     blocks: [
@@ -125,79 +86,18 @@ v &= ?
 
     solution: [
       {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-&\text{Revenue (1 tablet): }\$14\\
-&\text{Profit: }\$406\\
-&\text{Expenses: }\$112\\
-&\text{Tablets rented = ?}\\
-&\text{Let no. of tablets rented = }x.
-\end{aligned}`
-      },
-      {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-&\text{Revenue (x tablets)}=14x\\[14pt]
-&\boldsymbol{\mathit{Profit}=\mathit{Revenue}(x\ \mathit{tablets})-\mathit{Expenses}}\\[8pt]
-&406=14x-112\\
-&14x=406+112\\
-&14x=518\\
-&x=\frac{518}{14}\\
-&x=37
-\end{aligned}`
+        type: 'pdf',
+        src: 'solutions/SAT-M-Sol-02.pdf',
+        title: 'SAT Algebra Medium M002 Solution'
       }
     ]
   },
 
   {
-    id: 'q03',
+    id: 'M003',
     practiceId: 'sat-linear-equations',
     difficulty: 'medium',
-    number: 'Q03',
-    type: 'Linear Equations — Word Problems',
-
-    blocks: [
-      {
-        type: 'text',
-        content: 'A museum rents tablets to visitors. The museum earns revenue of $14 for each tablet rented for the day. On Wednesday, the museum earned $406 in profit from renting tablets after paying daily expenses of $112. How many tablets did the museum rent on Wednesday? (profit = total revenue − total expenses)'
-      }
-    ],
-
-    solution: [
-      {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-&\text{Revenue (1 tablet): }\$14\\
-&\text{Profit: }\$406\\
-&\text{Expenses: }\$112\\
-&\text{Tablets rented: }?\\
-&\text{Let the number of tablets rented be }x.
-\end{aligned}`
-      },
-      {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-&\text{Revenue (x tablets)}=14x\\[12pt]
-&\text{Profit}=\text{Revenue}-\text{Expenses}\\[8pt]
-&406=14x-112\\
-&14x=406+112\\
-&14x=518\\
-&x=\frac{518}{14}\\
-&x=37
-\end{aligned}`
-      },
-      {
-        type: 'paragraph',
-        content: 'Answer: 37 tablets'
-      }
-    ]
-  },
-
-  {
-    id: 'q04',
-    practiceId: 'sat-linear-equations',
-    difficulty: 'medium',
-    number: 'Q04',
+    number: 'M003',
     type: 'Linear Equations — Word Problems',
 
     blocks: [
@@ -225,48 +125,18 @@ v &= ?
 
     solution: [
       {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-&\text{Initial wax: }17\text{ oz}\\
-&\text{Remaining wax: }6\text{ oz}\\
-&\text{Burn rate: 1 oz every 4 hours}\\
-&\text{Hours burned, }h=?
-\end{aligned}`
-      },
-      {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-\text{Burn rate}
-&=-\frac{1\text{ oz}}{4\text{ hours}}\\[8pt]
-&=-\frac14\text{ oz/hour}
-\end{aligned}`
-      },
-      {
-        type: 'paragraph',
-        content: 'Use the linear equation f(x) = mx + b, where m is the rate of change and b is the initial value.'
-      },
-      {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-\text{Remaining wax}&=(\text{Burn rate})(\text{Hours burned})+\text{Initial wax}\\[12pt]
-6&=-\frac14h+17\\[12pt]
-6-17&=-\frac14h\\[12pt]
--11&=-\frac14h\\[12pt]
-h&=44
-\end{aligned}`
-      },
-      {
-        type: 'paragraph',
-        content: 'Answer: D. 44 hours'
+        type: 'pdf',
+        src: 'solutions/SAT-M-Sol-03.pdf',
+        title: 'SAT Algebra Medium M003 Solution'
       }
     ]
   },
 
   {
-    id: 'q05',
+    id: 'H001',
     practiceId: 'sat-linear-equations',
     difficulty: 'hard',
-    number: 'Q01',
+    number: 'H001',
     type: 'Linear Equations — Systems of Equations',
 
     blocks: [
@@ -274,77 +144,38 @@ h&=44
         type: 'text',
         content: 'Store A sells raspberries for $5.50 per pint and blackberries for $3.00 per pint. Store B sells raspberries for $6.50 per pint and blackberries for $8.00 per pint. A certain purchase of raspberries and blackberries would cost $37.00 at Store A or $66.00 at Store B. How many pints of blackberries are in this purchase?'
       },
-      { type: 'paragraph', content: 'A. 4' },
-      { type: 'paragraph', content: 'B. 5' },
-      { type: 'paragraph', content: 'C. 8' },
-      { type: 'paragraph', content: 'D. 12' }
+      {
+        type: 'paragraph',
+        content: 'A. 4'
+      },
+      {
+        type: 'paragraph',
+        content: 'B. 5'
+      },
+      {
+        type: 'paragraph',
+        content: 'C. 8'
+      },
+      {
+        type: 'paragraph',
+        content: 'D. 12'
+      }
     ],
 
     solution: [
       {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-&\text{Let}\\
-&r=\text{pints of raspberries}\\
-&b=\text{pints of blackberries}\\[8pt]
-&\text{Store A:}\\
-&\text{Raspberries: }\$5.50/\text{pint}\\
-&\text{Blackberries: }\$3.00/\text{pint}\\
-&\text{Total: }\$37\\[8pt]
-&\text{Store B:}\\
-&\text{Raspberries: }\$6.50/\text{pint}\\
-&\text{Blackberries: }\$8.00/\text{pint}\\
-&\text{Total: }\$66\\[8pt]
-&b=?
-\end{aligned}`
-      },
-      {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-\text{Store A:}\quad 5.5r+3b&=37\quad (1)\\
-\text{Store B:}\quad 6.5r+8b&=66\quad (2)
-\end{aligned}`
-      },
-      {
-        type: 'paragraph',
-        content: 'Subtract equation (1) from equation (2):'
-      },
-      {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-(6.5r+8b)-(5.5r+3b)&=66-37\\
-6.5r-5.5r+8b-3b&=29\\
-r+5b&=29\\
-r&=29-5b
-\end{aligned}`
-      },
-      {
-        type: 'paragraph',
-        content: 'Substitute into equation (1):'
-      },
-      {
-        type: 'display-math',
-        content: String.raw`\begin{aligned}
-5.5r+3b&=37\\
-5.5(29-5b)+3b&=37\\
-159.5-27.5b+3b&=37\\
-159.5-24.5b&=37\\
--24.5b&=-122.5\\
-b&=5
-\end{aligned}`
-      },
-      {
-        type: 'paragraph',
-        content: 'Answer: B. 5 pints of blackberries'
+        type: 'pdf',
+        src: 'solutions/SAT-H-Sol-01.pdf',
+        title: 'SAT Algebra Hard H001 Solution'
       }
     ]
   },
 
   {
-    id: 'q06',
+    id: 'H002',
     practiceId: 'sat-linear-equations',
     difficulty: 'hard',
-    number: 'Q02',
+    number: 'H002',
     type: 'Linear Equations — Rate of Change',
 
     blocks: [
@@ -360,17 +191,29 @@ b&=5
         type: 'text',
         content: 'gives the temperature, in degrees Fahrenheit, that corresponds to a temperature of x kelvins. If a temperature increased by 2.10 kelvins, by how much did the temperature increase, in degrees Fahrenheit?'
       },
-      { type: 'paragraph', content: 'A. 3.78' },
-      { type: 'paragraph', content: 'B. 35.78' },
-      { type: 'paragraph', content: 'C. 487.89' },
-      { type: 'paragraph', content: 'D. 519.89' }
+      {
+        type: 'paragraph',
+        content: 'A. 3.78'
+      },
+      {
+        type: 'paragraph',
+        content: 'B. 35.78'
+      },
+      {
+        type: 'paragraph',
+        content: 'C. 487.89'
+      },
+      {
+        type: 'paragraph',
+        content: 'D. 519.89'
+      }
     ],
 
     solution: [
       {
         type: 'pdf',
-        src: 'solutions/Content to Model to Calculation-6-ready.pdf',
-        title: 'SAT Algebra Hard Q02 Solution'
+        src: 'solutions/SAT-H-Sol-02.pdf',
+        title: 'SAT Algebra Hard H002 Solution'
       }
     ]
   }
