@@ -21,12 +21,6 @@ import {
 const base = import.meta.env.BASE_URL;
 const app = document.querySelector('#app');
 
-const courses = [
-  { id: 'algebra', title: 'Algebra' },
-  { id: 'geometry', title: 'Geometry' },
-  { id: 'sat-math', title: 'SAT Math Practices' }
-];
-
 app.innerHTML = `
   <header class="site-header">
     <div class="container header-inner">
@@ -184,17 +178,6 @@ app.innerHTML = `
         >
           Sign in to view your account information.
         </p>
-
-        <div
-          id="course-approvals"
-          style="display: none; margin-top: 24px;"
-        >
-          <h3 style="margin-bottom: 16px;">
-            Your Premium Courses
-          </h3>
-
-          <div id="course-approval-list"></div>
-        </div>
       </div>
     </div>
   </main>
@@ -219,9 +202,6 @@ const accountEmail = document.querySelector('#account-email');
 const accountStatus = document.querySelector('#premium-status');
 const approvalMessage = document.querySelector('#approval-message');
 
-const courseApprovals = document.querySelector('#course-approvals');
-const courseApprovalList = document.querySelector('#course-approval-list');
-
 let stopUserListener = null;
 
 function clearUserListener() {
@@ -231,56 +211,11 @@ function clearUserListener() {
   }
 }
 
-function hideApprovals() {
-  courseApprovals.style.display = 'none';
-  courseApprovalList.replaceChildren();
-}
-
-function showApprovals(approvedCourses, isAdmin) {
-  courseApprovalList.replaceChildren();
-
-  for (const course of courses) {
-    const approved =
-      isAdmin || approvedCourses[course.id] === true;
-
-    const row = document.createElement('div');
-
-    row.style.cssText = `
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 0;
-      border-bottom: 1px solid #e2e8f0;
-    `;
-
-    const title = document.createElement('span');
-    title.textContent = course.title;
-
-    const status = document.createElement('span');
-    status.textContent = approved
-      ? 'Approved'
-      : 'Not approved';
-
-    status.style.cssText = `
-      font-weight: 600;
-      font-size: 14px;
-      color: ${approved ? '#15803d' : '#64748b'};
-    `;
-
-    row.append(title, status);
-    courseApprovalList.append(row);
-  }
-
-  courseApprovals.style.display = 'block';
-}
-
 onAuthStateChanged(
   auth,
 
   (user) => {
     clearUserListener();
-    hideApprovals();
 
     if (!user) {
       signInButton.style.display = 'inline-flex';
@@ -318,7 +253,7 @@ onAuthStateChanged(
       'Successfully signed in with Google.';
 
     accountStatus.textContent = 'Checking permissions...';
-    approvalMessage.textContent = 'Loading course approvals...';
+    approvalMessage.textContent = 'Loading account information...';
 
     const userReference = doc(db, 'users', user.uid);
 
@@ -327,8 +262,6 @@ onAuthStateChanged(
 
       (snapshot) => {
         if (!snapshot.exists()) {
-          hideApprovals();
-
           accountStatus.textContent = 'Account setup pending';
 
           approvalMessage.textContent =
@@ -341,27 +274,17 @@ onAuthStateChanged(
 
         const isAdmin = data.role === 'admin';
 
-        const approvedCourses =
-          data.approvedCourses &&
-          typeof data.approvedCourses === 'object'
-            ? data.approvedCourses
-            : {};
-
         accountStatus.textContent = isAdmin
           ? 'Administrator'
           : 'Student';
 
         approvalMessage.textContent = isAdmin
           ? 'Administrator access is enabled.'
-          : 'Your course approvals are shown below.';
-
-        showApprovals(approvedCourses, isAdmin);
+          : 'Premium courses require administrator approval.';
       },
 
       (error) => {
         console.error('Firestore profile error:', error);
-
-        hideApprovals();
 
         accountStatus.textContent =
           'Unable to load permissions';
@@ -374,7 +297,6 @@ onAuthStateChanged(
 
   (error) => {
     clearUserListener();
-    hideApprovals();
 
     signInButton.style.display = 'inline-flex';
     signInButton.disabled = false;

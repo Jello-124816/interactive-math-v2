@@ -5,6 +5,8 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
+let activeSatNavigationCleanup = null;
+
 function getSolutionFileUrl(src) {
   const base = import.meta.env.BASE_URL;
 
@@ -515,6 +517,16 @@ function renderQuestionBlocks(container, blocks = []) {
 }
 
 export function renderSatQuestion(container, questionId) {
+  if (typeof activeSatNavigationCleanup === 'function') {
+    activeSatNavigationCleanup();
+    activeSatNavigationCleanup = null;
+  }
+
+  if (typeof container._satNavigationCleanup === 'function') {
+    container._satNavigationCleanup();
+    container._satNavigationCleanup = null;
+  }
+
   const question = satQuestions.find(
     item => item.id === questionId
   );
@@ -567,11 +579,325 @@ export function renderSatQuestion(container, questionId) {
     solutionContent.append(placeholder);
   }
 
-  solutionDetails.addEventListener('toggle', () => {
-    if (solutionDetails.open) {
-      typesetMath(solutionContent);
+  const navigationButton = document.createElement('button');
+  navigationButton.type = 'button';
+  navigationButton.className = 'sat-question-solution-navigation';
+
+  navigationButton.style.position = 'fixed';
+  navigationButton.style.right = 'max(16px, env(safe-area-inset-right))';
+  navigationButton.style.bottom = 'max(20px, env(safe-area-inset-bottom))';
+  navigationButton.style.zIndex = '1000';
+  navigationButton.style.display = 'none';
+  navigationButton.style.alignItems = 'center';
+  navigationButton.style.justifyContent = 'center';
+  navigationButton.style.gap = '7px';
+  navigationButton.style.padding = '9px 13px';
+  navigationButton.style.border = '1px solid #cbd5e1';
+  navigationButton.style.borderRadius = '9px';
+  navigationButton.style.background = '#ffffff';
+  navigationButton.style.color = '#2563eb';
+  navigationButton.style.font = 'inherit';
+  navigationButton.style.fontSize = '13px';
+  navigationButton.style.fontWeight = '600';
+  navigationButton.style.lineHeight = '1.3';
+  navigationButton.style.cursor = 'pointer';
+  navigationButton.style.boxShadow =
+    '0 2px 10px rgba(15, 23, 42, 0.10)';
+  navigationButton.style.maxWidth = 'calc(100vw - 32px)';
+
+  document.body.append(navigationButton);
+
+  let navigationFrame = null;
+  let navigationTarget = null;
+  let navigationActive = true;
+  let navigationEnabled = false;
+  let navigationObserver = null;
+
+  function getScrollOffset() {
+    const header = document.querySelector('header');
+
+    if (!header) return 16;
+
+    const style = window.getComputedStyle(header);
+
+    if (
+      style.position !== 'fixed' &&
+      style.position !== 'sticky'
+    ) {
+      return 16;
+    }
+
+    const rect = header.getBoundingClientRect();
+
+    if (rect.bottom <= 0 || rect.top > 0) {
+      return 16;
+    }
+
+    return Math.max(16, rect.bottom + 12);
+  }
+
+  function scrollToSection(element) {
+    if (!element) return;
+
+    const top =
+      window.scrollY +
+      element.getBoundingClientRect().top -
+      getScrollOffset();
+
+    window.scrollTo({
+      top: Math.max(0, top),
+      behavior: 'smooth'
+    });
+  }
+
+  function getQuestionHeading() {
+    const number = String(
+      question.number || question.id
+    ).trim();
+
+    const possibleHeadings = document.querySelectorAll(
+      'h1, h2, h3, h4, h5, h6'
+    );
+
+    for (const heading of possibleHeadings) {
+      if (
+        heading.textContent.trim() === number &&
+        heading.getBoundingClientRect().width > 0
+      ) {
+        return heading;
+      }
+    }
+
+    return content;
+  }
+
+  function getSolutionControls() {
+    return solutionContent.querySelector(
+      '.sat-solution-pdf > div'
+    ) || solutionContent;
+  }
+
+  function getPdfViewport() {
+    const pdf = solutionContent.querySelector(
+      '.sat-solution-pdf'
+    );
+
+    if (!pdf) return solutionContent;
+
+    return pdf.children[1] || pdf;
+  }
+
+  function isVisible(element) {
+    if (!element || !element.isConnected) {
+      return false;
+    }
+
+    const rect = element.getBoundingClientRect();
+
+    const visibleTop = getScrollOffset();
+    const visibleBottom = window.innerHeight;
+
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.bottom > visibleTop &&
+      rect.top < visibleBottom
+    );
+  }
+
+  function setNavigationTarget(target) {
+    navigationTarget = target;
+
+    if (
+      !navigationActive ||
+      !navigationEnabled ||
+      !solutionDetails.open
+    ) {
+      navigationButton.style.display = 'none';
+      return;
+    }
+
+    if (target === 'solution') {
+      navigationButton.textContent = '↓ Go to Solution';
+      navigationButton.setAttribute(
+        'aria-label',
+        'Go to Solution'
+      );
+      navigationButton.style.display = 'flex';
+    } else if (target === 'question') {
+      navigationButton.textContent = '↑ Go to Question';
+      navigationButton.setAttribute(
+        'aria-label',
+        'Go to Question'
+      );
+      navigationButton.style.display = 'flex';
+    } else {
+      navigationButton.style.display = 'none';
+    }
+  }
+
+  function updateNavigationButton() {
+    if (!navigationActive) return;
+
+    if (
+      !navigationEnabled ||
+      !container.isConnected ||
+      !content.isConnected ||
+      !solutionDetails.isConnected ||
+      !solutionDetails.open
+    ) {
+      setNavigationTarget(null);
+      return;
+    }
+
+    const questionVisible = isVisible(content);
+    const pdfVisible = isVisible(getPdfViewport());
+
+    if (questionVisible && pdfVisible) {
+      setNavigationTarget(null);
+      return;
+    }
+
+    if (questionVisible && !pdfVisible) {
+      setNavigationTarget('solution');
+      return;
+    }
+
+    if (!questionVisible && pdfVisible) {
+      setNavigationTarget('question');
+      return;
+    }
+
+    const questionRect = content.getBoundingClientRect();
+    const solutionRect =
+      getSolutionControls().getBoundingClientRect();
+
+    if (window.innerHeight <= questionRect.top) {
+      setNavigationTarget('question');
+    } else if (solutionRect.top >= window.innerHeight) {
+      setNavigationTarget('solution');
+    } else if (questionRect.bottom <= getScrollOffset()) {
+      setNavigationTarget('question');
+    } else {
+      setNavigationTarget('solution');
+    }
+  }
+
+  function scheduleNavigationUpdate() {
+    if (!navigationActive) return;
+
+    if (navigationFrame !== null) return;
+
+    navigationFrame = window.requestAnimationFrame(() => {
+      navigationFrame = null;
+      updateNavigationButton();
+    });
+  }
+
+  navigationButton.addEventListener('click', () => {
+    if (
+      !navigationEnabled ||
+      !solutionDetails.open
+    ) {
+      return;
+    }
+
+    if (navigationTarget === 'solution') {
+      scrollToSection(getSolutionControls());
+    } else if (navigationTarget === 'question') {
+      scrollToSection(getQuestionHeading());
     }
   });
+
+  function onSolutionToggle() {
+    if (!navigationActive) return;
+
+    if (solutionDetails.open) {
+      navigationEnabled = true;
+      typesetMath(solutionContent);
+    } else {
+      navigationEnabled = false;
+      setNavigationTarget(null);
+    }
+
+    scheduleNavigationUpdate();
+  }
+
+  function cleanupNavigation() {
+    if (!navigationActive) return;
+
+    navigationActive = false;
+    navigationEnabled = false;
+
+    window.removeEventListener(
+      'scroll',
+      scheduleNavigationUpdate
+    );
+
+    window.removeEventListener(
+      'resize',
+      scheduleNavigationUpdate
+    );
+
+    solutionDetails.removeEventListener(
+      'toggle',
+      onSolutionToggle
+    );
+
+    if (navigationFrame !== null) {
+      window.cancelAnimationFrame(navigationFrame);
+      navigationFrame = null;
+    }
+
+    if (navigationObserver) {
+      navigationObserver.disconnect();
+      navigationObserver = null;
+    }
+
+    navigationButton.remove();
+
+    if (container._satNavigationCleanup === cleanupNavigation) {
+      container._satNavigationCleanup = null;
+    }
+
+    if (activeSatNavigationCleanup === cleanupNavigation) {
+      activeSatNavigationCleanup = null;
+    }
+  }
+
+  solutionDetails.addEventListener(
+    'toggle',
+    onSolutionToggle
+  );
+
+  window.addEventListener(
+    'scroll',
+    scheduleNavigationUpdate,
+    { passive: true }
+  );
+
+  window.addEventListener(
+    'resize',
+    scheduleNavigationUpdate
+  );
+
+  navigationObserver = new MutationObserver(() => {
+    if (
+      !content.isConnected ||
+      !solutionDetails.isConnected ||
+      !container.isConnected
+    ) {
+      cleanupNavigation();
+    }
+  });
+
+  navigationObserver.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  container._satNavigationCleanup = cleanupNavigation;
+  activeSatNavigationCleanup = cleanupNavigation;
 
   const backButton = document.createElement('button');
   backButton.type = 'button';
@@ -589,6 +915,8 @@ export function renderSatQuestion(container, questionId) {
   backButton.style.cursor = 'pointer';
 
   backButton.addEventListener('click', () => {
+    cleanupNavigation();
+
     const existingBackButton =
       document.querySelector('#library-back');
 

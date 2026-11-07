@@ -42,6 +42,10 @@ const libraryTitle = document.querySelector('#library-title');
 const practiceView = document.querySelector('#practice-view');
 const librarySummary = document.querySelector('.library-summary');
 
+const myPremiumSection = document.querySelector('#my-premium-courses');
+const myPremiumGrid = document.querySelector('#my-premium-grid');
+const myPremiumCount = document.querySelector('#my-premium-count');
+
 const pageHeading = document.querySelector('.library-heading h1');
 const pageDescription = document.querySelector('.library-heading p');
 const homeBackLink = document.querySelector('.back-link');
@@ -103,6 +107,10 @@ let currentQuestion = null;
 
 let premiumCheckInProgress = false;
 
+let premiumProfile = null;
+let premiumProfileUserId = null;
+let premiumProfileRequest = 0;
+
 const urlParams = new URLSearchParams(window.location.search);
 
 const requestedCourse = urlParams.get('course');
@@ -135,13 +143,126 @@ const authReady = new Promise((resolve) => {
   );
 });
 
+function hasPremiumApproval(courseId) {
+  if (!premiumProfile) return false;
+
+  const isAdmin = premiumProfile.role === 'admin';
+
+  const approvedCourses =
+    premiumProfile.approvedCourses &&
+    typeof premiumProfile.approvedCourses === 'object'
+      ? premiumProfile.approvedCourses
+      : {};
+
+  return (
+    isAdmin ||
+    approvedCourses[courseId] === true
+  );
+}
+
+function renderMyPremiumCourses() {
+  if (currentCourse !== null || currentPractice !== null) {
+    myPremiumSection.style.display = 'none';
+    return;
+  }
+
+  const approvedCourses =
+    premiumProfileUserId === auth.currentUser?.uid
+      ? freeCourses.filter(
+          course =>
+            course.hasPremium !== false &&
+            hasPremiumApproval(course.id)
+        )
+      : [];
+
+  const searchQuery = searchInput.value;
+
+  const filtered = approvedCourses.filter(
+    course => matchesSearch(course, searchQuery)
+  );
+
+  myPremiumGrid.replaceChildren(
+    ...filtered.map(course =>
+      createCard(
+        {
+          ...course,
+          premiumApproved: true
+        },
+        'course',
+        handleCardNavigation
+      )
+    )
+  );
+
+  myPremiumCount.textContent =
+    `${filtered.length} ${filtered.length === 1 ? 'course' : 'courses'}`;
+
+  myPremiumSection.style.display =
+    filtered.length > 0 ? 'block' : 'none';
+}
+
+function renderPremiumLocks() {
+  if (currentCourse !== null) return;
+
+  renderLibrary();
+}
+
+onAuthStateChanged(
+  auth,
+  async (user) => {
+    const requestId = ++premiumProfileRequest;
+
+    premiumProfile = null;
+    premiumProfileUserId = null;
+
+    renderPremiumLocks();
+
+    if (!user) return;
+
+    try {
+      const userReference = doc(
+        db,
+        'users',
+        user.uid
+      );
+
+      const userSnapshot = await getDoc(userReference);
+
+      if (requestId !== premiumProfileRequest) return;
+
+      if (auth.currentUser?.uid !== user.uid) return;
+
+      if (userSnapshot.exists()) {
+        premiumProfile = userSnapshot.data();
+        premiumProfileUserId = user.uid;
+      }
+
+      renderPremiumLocks();
+
+    } catch (error) {
+      if (requestId !== premiumProfileRequest) return;
+
+      console.error(
+        'Unable to load Premium approval status:',
+        error
+      );
+
+      premiumProfile = null;
+      premiumProfileUserId = null;
+
+      renderPremiumLocks();
+    }
+  }
+);
+
 async function openPremiumCourse(course) {
   if (premiumCheckInProgress) return;
 
   const validCourseIds = [
     'algebra',
     'geometry',
-    'sat-math'
+    'sat-math',
+    'interactive-visualizations'
   ];
 
   if (!course || !validCourseIds.includes(course.id)) {
@@ -295,6 +416,7 @@ function showQuestion(questionId) {
   searchContainer.hidden = true;
   emptyMessage.hidden = true;
   practiceView.hidden = false;
+  myPremiumSection.style.display = 'none';
 
   backButton.hidden = false;
   backButton.textContent = '← Back to Questions';
@@ -319,6 +441,7 @@ function renderPractice() {
   searchContainer.hidden = true;
   emptyMessage.hidden = true;
   practiceView.hidden = false;
+  myPremiumSection.style.display = 'none';
 
   backButton.hidden = false;
 
@@ -367,6 +490,14 @@ function updatePageIntroduction() {
       'Practice SAT Math with topic-based questions organized by difficulty. ' +
       'Strengthen your problem-solving skills through clear, step-by-step ' +
       'solutions and prepare confidently for the Digital SAT.';
+
+    pageDescription.hidden = false;
+
+  } else if (currentCourse === 'interactive-visualizations') {
+    pageHeading.textContent = 'Interactive Visualizations';
+
+    pageDescription.textContent =
+      'Explore mathematics through interactive graphs, diagrams, and visual tools.';
 
     pageDescription.hidden = false;
 
@@ -433,7 +564,7 @@ function renderLibrary() {
       libraryTitle.textContent =
         selectedCategory?.title || 'SAT Math Practices';
 
-      libraryTitle.hidden = true;
+      libraryTitle.hidden = false;
 
       coursesBackLink.hidden = false;
       backButton.textContent =
@@ -452,7 +583,9 @@ function renderLibrary() {
     );
 
     libraryTitle.textContent =
-      `${course?.title || 'Mathematics'} Topics`;
+      currentCourse === 'interactive-visualizations'
+        ? 'Interactive Visualizations'
+        : `${course?.title || 'Mathematics'} Topics`;
 
     libraryTitle.hidden = false;
 
@@ -469,10 +602,29 @@ function renderLibrary() {
   );
 
   topicGrid.replaceChildren(
-    ...filtered.map(item =>
-      createCard(item, type, handleCardNavigation)
-    )
+    ...filtered.map(item => {
+      if (type === 'course') {
+        return createCard(
+          {
+            ...item,
+            premiumApproved:
+              premiumProfileUserId === auth.currentUser?.uid &&
+              hasPremiumApproval(item.id)
+          },
+          type,
+          handleCardNavigation
+        );
+      }
+
+      return createCard(
+        item,
+        type,
+        handleCardNavigation
+      );
+    })
   );
+
+  renderMyPremiumCourses();
 
   let countLabel;
 

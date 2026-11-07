@@ -7,34 +7,23 @@ const base = import.meta.env.BASE_URL;
 
 export const freeCourses = [
   {
-    id: 'algebra',
-    title: 'Algebra',
-    category: 'Mathematics Course',
-    description:
-      'Learn equations, functions, graphs, and essential algebraic concepts through structured topics and lessons.',
-    icon: '📈',
-    hasFree: true,
-    hasPremium: true
-  },
-
-  {
-    id: 'geometry',
-    title: 'Geometry',
-    category: 'Mathematics Course',
-    description:
-      'Study shapes, measurements, geometric relationships, and mathematical reasoning.',
-    icon: '📐',
-    hasFree: true,
-    hasPremium: true
-  },
-
-  {
     id: 'sat-math',
     title: 'SAT Math Practices',
     category: 'Standardized Test Preparation',
     description:
       'Practice SAT Math questions covering Algebra, Advanced Math, Geometry and Trigonometry, and Problem-Solving and Data Analysis.',
     icon: '📝',
+    hasFree: true,
+    hasPremium: true
+  },
+
+  {
+    id: 'interactive-visualizations',
+    title: 'Interactive Visualizations',
+    category: 'Interactive Mathematics',
+    description:
+      'Explore mathematical concepts through interactive graphs, diagrams, and visual tools.',
+    icon: '📊',
     hasFree: true,
     hasPremium: true
   }
@@ -63,6 +52,28 @@ export const interactiveTopics = [
     category: 'Geometry',
     description:
       'Study right triangles and the relationship between their side lengths.',
+    icon: '📐',
+    url: `${base}pythagorean.html`
+  },
+
+  {
+    id: 'visual-linear',
+    courseId: 'interactive-visualizations',
+    title: 'Linear Equations & Functions',
+    category: 'Interactive Visualization',
+    description:
+      'Explore linear equations, slope, intercepts, and graphs using interactive visual tools.',
+    icon: '📈',
+    url: `${base}linear.html`
+  },
+
+  {
+    id: 'visual-pythagorean',
+    courseId: 'interactive-visualizations',
+    title: 'Pythagorean Theorem',
+    category: 'Interactive Visualization',
+    description:
+      'Explore right triangles and the Pythagorean theorem through interactive diagrams.',
     icon: '📐',
     url: `${base}pythagorean.html`
   }

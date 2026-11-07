@@ -28,10 +28,6 @@ export function createCard(item, type, onNavigate) {
 
   card.append(icon, category, title, description);
 
-  // -------------------------------------
-  // Main course cards
-  // -------------------------------------
-
   if (type === 'course') {
     const actions = document.createElement('div');
     actions.className = 'course-access-actions';
@@ -44,7 +40,6 @@ export function createCard(item, type, onNavigate) {
       paddingTop: '18px'
     });
 
-    // Free button
     if (item.hasFree !== false) {
       const freeButton = document.createElement('button');
       freeButton.type = 'button';
@@ -82,11 +77,68 @@ export function createCard(item, type, onNavigate) {
       actions.append(freeButton);
     }
 
-    // Premium button
     if (item.hasPremium !== false) {
       const premiumButton = document.createElement('button');
       premiumButton.type = 'button';
-      premiumButton.textContent = 'Premium';
+
+      const premiumText = document.createElement('span');
+      premiumText.textContent = 'Premium';
+
+      premiumButton.append(premiumText);
+
+      if (item.premiumApproved !== true) {
+        const svgNamespace = 'http://www.w3.org/2000/svg';
+
+        const lockIcon = document.createElementNS(
+          svgNamespace,
+          'svg'
+        );
+
+        lockIcon.setAttribute('width', '14');
+        lockIcon.setAttribute('height', '14');
+        lockIcon.setAttribute('viewBox', '0 0 24 24');
+        lockIcon.setAttribute('fill', 'none');
+        lockIcon.setAttribute('stroke', 'currentColor');
+        lockIcon.setAttribute('stroke-width', '2');
+        lockIcon.setAttribute('stroke-linecap', 'round');
+        lockIcon.setAttribute('stroke-linejoin', 'round');
+        lockIcon.setAttribute('aria-hidden', 'true');
+
+        const shackle = document.createElementNS(
+          svgNamespace,
+          'rect'
+        );
+
+        shackle.setAttribute('width', '14');
+        shackle.setAttribute('height', '11');
+        shackle.setAttribute('x', '5');
+        shackle.setAttribute('y', '11');
+        shackle.setAttribute('rx', '2');
+
+        const lockTop = document.createElementNS(
+          svgNamespace,
+          'path'
+        );
+
+        lockTop.setAttribute(
+          'd',
+          'M8 11V7a4 4 0 0 1 8 0v4'
+        );
+
+        lockIcon.append(shackle, lockTop);
+
+        Object.assign(lockIcon.style, {
+          display: 'inline-block',
+          marginLeft: '5px',
+          verticalAlign: 'middle',
+          flexShrink: '0'
+        });
+
+        premiumButton.append(lockIcon);
+
+        premiumButton.title =
+          'Premium access requires approval';
+      }
 
       Object.assign(premiumButton.style, {
         flex: '1',
@@ -124,15 +176,10 @@ export function createCard(item, type, onNavigate) {
     return card;
   }
 
-  // -------------------------------------
-  // Topic, SAT category, and practice cards
-  // -------------------------------------
-
   const exploreButton = document.createElement('button');
   exploreButton.type = 'button';
   exploreButton.className = 'topic-card-button';
 
-  // Updated button text
   exploreButton.textContent = item.url
     ? 'Open →'
     : 'Explore →';

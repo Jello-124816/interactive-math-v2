@@ -84,6 +84,22 @@ export function renderFreeLayout() {
         ← Back to Courses
       </button>
 
+      <section
+        id="my-premium-courses"
+        aria-labelledby="my-premium-title"
+        style="display: none; margin-bottom: 45px;"
+      >
+        <div class="library-summary">
+          <h2 id="my-premium-title">My Premium Courses</h2>
+          <span id="my-premium-count"></span>
+        </div>
+
+        <div
+          id="my-premium-grid"
+          class="topic-grid"
+        ></div>
+      </section>
+
       <div class="library-summary">
         <h2 id="library-title">Explore Courses</h2>
         <span id="topic-count"></span>

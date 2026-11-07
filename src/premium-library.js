@@ -35,6 +35,15 @@ const PREMIUM_COURSES = {
     description:
       'Practice SAT mathematics through premium questions and lessons.',
     icon: '📝'
+  },
+
+  'interactive-visualizations': {
+    id: 'interactive-visualizations',
+    title: 'Interactive Visualizations',
+    category: 'Premium Course',
+    description:
+      'Explore mathematics through premium interactive visualizations, diagrams, and lessons.',
+    icon: '📊'
   }
 };
 

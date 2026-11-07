@@ -45,6 +45,11 @@ const PREMIUM_COURSES = {
   'sat-math': {
     id: 'sat-math',
     title: 'SAT Math Practices'
+  },
+
+  'interactive-visualizations': {
+    id: 'interactive-visualizations',
+    title: 'Interactive Visualizations'
   }
 };
 
