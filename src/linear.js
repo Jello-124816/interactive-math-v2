@@ -28,9 +28,11 @@ app.innerHTML = `
 
   <main class="math-page container">
 
-    <a class="back-link" href="${import.meta.env.BASE_URL}explore.html">
-      ← Back
-    </a>
+    <div style="position: sticky; top: 12px; z-index: 20; background: #f5f7fb; padding: 8px 0;">
+      <a class="back-link" href="${import.meta.env.BASE_URL}explore.html?course=interactive-visualizations">
+        ← Back
+      </a>
+    </div>
 
     <div class="math-heading">
       <h1>Linear Equations and Their Graphs</h1>

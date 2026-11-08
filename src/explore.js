@@ -116,6 +116,10 @@ const urlParams = new URLSearchParams(window.location.search);
 const requestedCourse = urlParams.get('course');
 const requestedCategory = urlParams.get('category');
 
+if (requestedCourse === 'interactive-visualizations') {
+  currentCourse = 'interactive-visualizations';
+}
+
 if (requestedCourse === 'sat-math') {
   currentCourse = 'sat-math';
 

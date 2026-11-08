@@ -23,9 +23,11 @@ app.innerHTML = `
   </header>
 
   <main class="math-page container">
-    <a href="${import.meta.env.BASE_URL}explore.html" class="back-link">
-      ← Back
-    </a>
+    <div style="position: sticky; top: 12px; z-index: 20; background: #f5f7fb; padding: 8px 0;">
+      <a href="${import.meta.env.BASE_URL}explore.html?course=interactive-visualizations" class="back-link">
+        ← Back
+      </a>
+    </div>
 
     <div class="math-heading">
       <h1>Pythagorean Theorem</h1>
