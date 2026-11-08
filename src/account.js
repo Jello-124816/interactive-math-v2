@@ -31,7 +31,7 @@ app.innerHTML = `
 
       <nav class="header-nav" aria-label="Main navigation">
         <a href="${base}">Home</a>
-        <a href="${base}free.html">Explore</a>
+        <a href="${base}explore.html">Explore</a>
         <a href="${base}#about">About</a>
         <a href="${base}account.html" aria-current="page">Account</a>
       </nav>

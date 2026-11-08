@@ -1,6 +1,6 @@
 
 import './style.css';
-import './free.css';
+import './math-content.css';
 import './premium-library.css';
 
 import {
@@ -92,7 +92,7 @@ app.innerHTML = `
         >
           <a href="${base}">Home</a>
 
-          <a href="${base}free.html">
+          <a href="${base}explore.html">
             Explore
           </a>
 
@@ -128,7 +128,7 @@ app.innerHTML = `
 
       <a
         class="back-link"
-        href="${base}free.html"
+        href="${base}explore.html"
         style="
           display: inline-flex;
           align-items: center;

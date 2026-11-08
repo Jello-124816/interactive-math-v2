@@ -385,7 +385,7 @@ export function createPremiumLibrary(container, db, courseId) {
 
     } else {
       // Return to the main Explore page.
-      window.location.href = `${base}free.html`;
+      window.location.href = `${base}explore.html`;
       return;
     }
 

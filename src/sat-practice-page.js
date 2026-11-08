@@ -1,9 +1,9 @@
 
 import './style.css';
-import './free.css';
+import './math-content.css';
 
 import { satPractices } from './data/library-data.js';
-import { renderFreeLayout } from './components/free-layout.js';
+import { renderFreeLayout } from './components/explore-layout.js';
 import { renderSatPractice } from './components/sat-practice.js';
 import { renderSatQuestionPage } from './components/sat-question-page.js';
 
@@ -68,7 +68,7 @@ backButton.hidden = false;
 backButton.style.marginBottom = '0';
 
 function getLibraryUrl() {
-  return `${base}free.html?course=sat-math&category=${
+  return `${base}explore.html?course=sat-math&category=${
     encodeURIComponent(practice?.categoryId || '')
   }`;
 }

@@ -1,6 +1,6 @@
 
 import './style.css';
-import './free.css';
+import './math-content.css';
 
 import {
   onAuthStateChanged
@@ -23,7 +23,7 @@ import {
   satPractices
 } from './data/library-data.js';
 
-import { renderFreeLayout } from './components/free-layout.js';
+import { renderFreeLayout } from './components/explore-layout.js';
 import { createCard } from './components/course-card.js';
 import { renderSatPractice } from './components/sat-practice.js';
 import { renderSatQuestionPage } from './components/sat-question-page.js';
@@ -71,7 +71,7 @@ backLinksRow.style.marginBottom = '20px';
 searchContainer.after(backLinksRow);
 
 const coursesBackLink = document.createElement('a');
-coursesBackLink.href = `${base}free.html`;
+coursesBackLink.href = `${base}explore.html`;
 coursesBackLink.textContent = '← Back to Courses';
 
 coursesBackLink.style.display = 'inline-flex';

@@ -16,7 +16,7 @@ app.innerHTML = `
 
       <nav class="header-nav" aria-label="Main navigation">
         <a href="#home">Home</a>
-        <a href="${base}free.html">Explore</a>
+        <a href="${base}explore.html">Explore</a>
         <a href="#about">About</a>
         <a href="${base}account.html">Account</a>
       </nav>
@@ -37,7 +37,7 @@ app.innerHTML = `
         </p>
 
         <div class="hero-actions">
-          <a class="btn btn-primary" href="${base}free.html">
+          <a class="btn btn-primary" href="${base}explore.html">
             Explore Courses <span aria-hidden="true">→</span>
           </a>
 
@@ -176,7 +176,7 @@ app.innerHTML = `
 
             <a
               class="btn btn-primary card-button"
-              href="${base}free.html"
+              href="${base}explore.html"
             >
               Explore
               <span aria-hidden="true">→</span>

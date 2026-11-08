@@ -17,7 +17,7 @@ export function renderFreeLayout() {
 
         <nav class="header-nav" aria-label="Main navigation">
           <a href="${base}">Home</a>
-          <a href="${base}free.html" aria-current="page">Explore</a>
+          <a href="${base}explore.html" aria-current="page">Explore</a>
           <a href="${base}#about">About</a>
           <a href="${base}account.html">Account</a>
         </nav>

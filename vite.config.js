@@ -8,7 +8,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
-        free: resolve(import.meta.dirname, 'free.html'),
+        free: resolve(import.meta.dirname, 'explore.html'),
         premium: resolve(import.meta.dirname, 'premium.html'),
         account: resolve(import.meta.dirname, 'account.html'),
         linear: resolve(import.meta.dirname, 'linear.html'),

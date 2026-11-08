@@ -7,7 +7,7 @@
   The Premium Library uses the same classes
   and styling as the Free Library.
 
-  Shared styles come from free.css:
+  Shared styles come from math-content.css:
   .library-page
   .library-heading
   .library-search
@@ -89,7 +89,7 @@
   .topic-category
   .topic-action
 
-  These are already styled in free.css.
+  These are already styled in math-content.css.
 */
 
 /* Remove default button appearance */

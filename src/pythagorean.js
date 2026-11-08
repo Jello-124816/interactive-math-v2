@@ -1,6 +1,6 @@
 
 import './style.css';
-import './free.css';
+import './math-content.css';
 import './pythagorean.css';
 
 const app = document.querySelector('#app');
@@ -8,21 +8,23 @@ const app = document.querySelector('#app');
 app.innerHTML = `
   <header class="site-header">
     <div class="container header-inner">
-      <a href="${import.meta.env.BASE_URL}" class="brand">
-        <span class="logo-placeholder">∑</span>
-        <span class="brand-name">Interactive Mathematics</span>
+      <a href="${import.meta.env.BASE_URL}" class="brand" aria-label="Mathematics home">
+        <span class="logo-placeholder" aria-hidden="true">∑</span>
+        <span class="brand-name">Mathematics</span>
       </a>
+
       <nav class="header-nav" aria-label="Main navigation">
         <a href="${import.meta.env.BASE_URL}">Home</a>
-        <a href="${import.meta.env.BASE_URL}free.html">Free</a>
-        <a href="${import.meta.env.BASE_URL}premium.html">Premium</a>
+        <a href="${import.meta.env.BASE_URL}explore.html">Explore</a>
+        <a href="${import.meta.env.BASE_URL}#about">About</a>
+        <a href="${import.meta.env.BASE_URL}account.html">Account</a>
       </nav>
     </div>
   </header>
 
   <main class="math-page container">
-    <a href="${import.meta.env.BASE_URL}free.html" class="back-link">
-      ← Back to Free Mathematics
+    <a href="${import.meta.env.BASE_URL}explore.html" class="back-link">
+      ← Back
     </a>
 
     <div class="math-heading">
