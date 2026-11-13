@@ -408,7 +408,11 @@ function showQuestion(questionId) {
     container: practiceView,
     questionId,
     practiceId: currentPractice,
-    difficulty: currentDifficulty
+    difficulty: currentDifficulty,
+    onQuestionNavigate(next) {
+      currentDifficulty = next.difficulty;
+      showQuestion(next.id);
+    }
   });
 
   if (!success) return;

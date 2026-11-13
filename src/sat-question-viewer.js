@@ -516,7 +516,23 @@ function renderQuestionBlocks(container, blocks = []) {
   });
 }
 
-export function renderSatQuestion(container, questionId) {
+function getAdjacentSatQuestion(question, direction, questions = satQuestions) {
+  const difficulties = ['easy', 'medium', 'hard'];
+  const sequence = questions.filter(item =>
+    item.practiceId === question.practiceId &&
+    item.courseId === question.courseId &&
+    item.subjectId === question.subjectId &&
+    item.subject === question.subject &&
+    difficulties.includes(item.difficulty) && /\d+$/.test(item.id)
+  ).sort((a, b) =>
+    difficulties.indexOf(a.difficulty) - difficulties.indexOf(b.difficulty) ||
+    Number(a.id.match(/\d+$/)[0]) - Number(b.id.match(/\d+$/)[0])
+  );
+  const index = sequence.findIndex(item => item.id === question.id);
+  return index < 0 ? null : sequence[(index + direction + sequence.length) % sequence.length];
+}
+
+export function renderSatQuestion(container, questionId, { onQuestionNavigate, navigationHost } = {}) {
   if (typeof activeSatNavigationCleanup === 'function') {
     activeSatNavigationCleanup();
     activeSatNavigationCleanup = null;
@@ -579,325 +595,150 @@ export function renderSatQuestion(container, questionId) {
     solutionContent.append(placeholder);
   }
 
-  const navigationButton = document.createElement('button');
-  navigationButton.type = 'button';
-  navigationButton.className = 'sat-question-solution-navigation';
+  const navigation = document.createElement('nav');
+  navigation.className = 'sat-question-navigation';
+  navigation.setAttribute('aria-label', 'Current question and answer');
 
-  navigationButton.style.position = 'fixed';
-  navigationButton.style.right = 'max(16px, env(safe-area-inset-right))';
-  navigationButton.style.bottom = 'max(20px, env(safe-area-inset-bottom))';
-  navigationButton.style.zIndex = '1000';
-  navigationButton.style.display = 'none';
-  navigationButton.style.alignItems = 'center';
-  navigationButton.style.justifyContent = 'center';
-  navigationButton.style.gap = '7px';
-  navigationButton.style.padding = '9px 13px';
-  navigationButton.style.border = '1px solid #cbd5e1';
-  navigationButton.style.borderRadius = '9px';
-  navigationButton.style.background = '#ffffff';
-  navigationButton.style.color = '#2563eb';
-  navigationButton.style.font = 'inherit';
-  navigationButton.style.fontSize = '13px';
-  navigationButton.style.fontWeight = '600';
-  navigationButton.style.lineHeight = '1.3';
-  navigationButton.style.cursor = 'pointer';
-  navigationButton.style.boxShadow =
-    '0 2px 10px rgba(15, 23, 42, 0.10)';
-  navigationButton.style.maxWidth = 'calc(100vw - 32px)';
+  function createNavigationButton(label, target) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.hidden = true;
+    button.setAttribute('aria-label', label === 'Go to Q'
+      ? 'Go to current question' : 'Go to current answer PDF');
+    button.addEventListener('click', () => scrollToSection(target()));
+    navigation.append(button);
+    return button;
+  }
 
-  document.body.append(navigationButton);
+  const questionButton = createNavigationButton('Go to Q', () => content);
+  const answerButton = createNavigationButton('Go to Ans', getPdfBox);
+  document.body.append(navigation);
+  // Reserve space even when both buttons are hidden, avoiding layout feedback.
+  document.body.classList.add('sat-navigation-active');
 
   let navigationFrame = null;
-  let navigationTarget = null;
   let navigationActive = true;
-  let navigationEnabled = false;
-  let navigationObserver = null;
+
+  function getPdfBox() {
+    return solutionContent.querySelector('.sat-solution-pdf');
+  }
+
+  function viewportBounds() {
+    const visual = window.visualViewport;
+    const top = visual?.offsetTop || 0;
+    const left = visual?.offsetLeft || 0;
+    return {
+      top,
+      left,
+      right: left + (visual?.width || document.documentElement.clientWidth),
+      bottom: top + (visual?.height || window.innerHeight)
+    };
+  }
 
   function getScrollOffset() {
-    const header = document.querySelector('header');
-
-    if (!header) return 16;
-
-    const style = window.getComputedStyle(header);
-
-    if (
-      style.position !== 'fixed' &&
-      style.position !== 'sticky'
-    ) {
-      return 16;
+    let top = viewportBounds().top;
+    // Include the existing sticky back links as well as any sticky site header.
+    for (const element of document.querySelectorAll(
+      'header, .library-back-links, .sat-practice-back-links'
+    )) {
+      const style = window.getComputedStyle(element);
+      if (style.position !== 'fixed' && style.position !== 'sticky') continue;
+      const rect = element.getBoundingClientRect();
+      const inset = Number.parseFloat(style.top);
+      if (rect.width <= 0 || rect.height <= 0 || !Number.isFinite(inset)) continue;
+      // Use the pinned position even before scrolling makes the row sticky.
+      top = Math.max(top, viewportBounds().top + Math.max(0, inset) + rect.height);
     }
+    return top;
+  }
 
-    const rect = header.getBoundingClientRect();
-
-    if (rect.bottom <= 0 || rect.top > 0) {
-      return 16;
-    }
-
-    return Math.max(16, rect.bottom + 12);
+  function isFullyVisible(element) {
+    if (!element?.isConnected) return false;
+    const rect = element.getBoundingClientRect();
+    const bounds = viewportBounds();
+    const bottom = Math.min(bounds.bottom, navigation.getBoundingClientRect().top);
+    // A one-pixel tolerance avoids subpixel rounding flicker at aligned edges.
+    return rect.width > 0 && rect.height > 0 &&
+      rect.top >= getScrollOffset() - 1 && rect.bottom <= bottom + 1 &&
+      rect.left >= bounds.left - 1 && rect.right <= bounds.right + 1;
   }
 
   function scrollToSection(element) {
-    if (!element) return;
-
-    const top =
-      window.scrollY +
-      element.getBoundingClientRect().top -
-      getScrollOffset();
-
+    if (!navigationActive || !element?.isConnected) return;
+    if (element !== content && !solutionDetails.open) return;
     window.scrollTo({
-      top: Math.max(0, top),
-      behavior: 'smooth'
+      top: Math.max(0, window.scrollY + element.getBoundingClientRect().top - getScrollOffset()),
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'
     });
   }
 
-  function getQuestionHeading() {
-    const number = String(
-      question.number || question.id
-    ).trim();
-
-    const possibleHeadings = document.querySelectorAll(
-      'h1, h2, h3, h4, h5, h6'
-    );
-
-    for (const heading of possibleHeadings) {
-      if (
-        heading.textContent.trim() === number &&
-        heading.getBoundingClientRect().width > 0
-      ) {
-        return heading;
-      }
-    }
-
-    return content;
-  }
-
-  function getSolutionControls() {
-    return solutionContent.querySelector(
-      '.sat-solution-pdf > div'
-    ) || solutionContent;
-  }
-
-  function getPdfViewport() {
-    const pdf = solutionContent.querySelector(
-      '.sat-solution-pdf'
-    );
-
-    if (!pdf) return solutionContent;
-
-    return pdf.children[1] || pdf;
-  }
-
-  function isVisible(element) {
-    if (!element || !element.isConnected) {
-      return false;
-    }
-
-    const rect = element.getBoundingClientRect();
-
-    const visibleTop = getScrollOffset();
-    const visibleBottom = window.innerHeight;
-
-    return (
-      rect.width > 0 &&
-      rect.height > 0 &&
-      rect.bottom > visibleTop &&
-      rect.top < visibleBottom
-    );
-  }
-
-  function setNavigationTarget(target) {
-    navigationTarget = target;
-
-    if (
-      !navigationActive ||
-      !navigationEnabled ||
-      !solutionDetails.open
-    ) {
-      navigationButton.style.display = 'none';
-      return;
-    }
-
-    if (target === 'solution') {
-      navigationButton.textContent = '↓ Go to Solution';
-      navigationButton.setAttribute(
-        'aria-label',
-        'Go to Solution'
-      );
-      navigationButton.style.display = 'flex';
-    } else if (target === 'question') {
-      navigationButton.textContent = '↑ Go to Question';
-      navigationButton.setAttribute(
-        'aria-label',
-        'Go to Question'
-      );
-      navigationButton.style.display = 'flex';
-    } else {
-      navigationButton.style.display = 'none';
-    }
-  }
-
-  function updateNavigationButton() {
+  function updateNavigationButtons() {
     if (!navigationActive) return;
-
-    if (
-      !navigationEnabled ||
-      !container.isConnected ||
-      !content.isConnected ||
-      !solutionDetails.isConnected ||
-      !solutionDetails.open
-    ) {
-      setNavigationTarget(null);
+    if (!container.isConnected || !content.isConnected) {
+      cleanupNavigation();
       return;
     }
-
-    const questionVisible = isVisible(content);
-    const pdfVisible = isVisible(getPdfViewport());
-
-    if (questionVisible && pdfVisible) {
-      setNavigationTarget(null);
-      return;
-    }
-
-    if (questionVisible && !pdfVisible) {
-      setNavigationTarget('solution');
-      return;
-    }
-
-    if (!questionVisible && pdfVisible) {
-      setNavigationTarget('question');
-      return;
-    }
-
-    const questionRect = content.getBoundingClientRect();
-    const solutionRect =
-      getSolutionControls().getBoundingClientRect();
-
-    if (window.innerHeight <= questionRect.top) {
-      setNavigationTarget('question');
-    } else if (solutionRect.top >= window.innerHeight) {
-      setNavigationTarget('solution');
-    } else if (questionRect.bottom <= getScrollOffset()) {
-      setNavigationTarget('question');
-    } else {
-      setNavigationTarget('solution');
-    }
+    questionButton.hidden = isFullyVisible(content);
+    const pdf = getPdfBox();
+    answerButton.hidden = !solutionDetails.open || !pdf || isFullyVisible(pdf);
   }
 
   function scheduleNavigationUpdate() {
-    if (!navigationActive) return;
-
-    if (navigationFrame !== null) return;
-
+    if (!navigationActive || navigationFrame !== null) return;
     navigationFrame = window.requestAnimationFrame(() => {
       navigationFrame = null;
-      updateNavigationButton();
+      updateNavigationButtons();
     });
   }
 
-  navigationButton.addEventListener('click', () => {
-    if (
-      !navigationEnabled ||
-      !solutionDetails.open
-    ) {
-      return;
-    }
-
-    if (navigationTarget === 'solution') {
-      scrollToSection(getSolutionControls());
-    } else if (navigationTarget === 'question') {
-      scrollToSection(getQuestionHeading());
-    }
-  });
-
   function onSolutionToggle() {
-    if (!navigationActive) return;
-
-    if (solutionDetails.open) {
-      navigationEnabled = true;
-      typesetMath(solutionContent);
-    } else {
-      navigationEnabled = false;
-      setNavigationTarget(null);
-    }
-
+    if (solutionDetails.open) typesetMath(solutionContent);
     scheduleNavigationUpdate();
   }
 
+  const resizeObserver = new ResizeObserver(scheduleNavigationUpdate);
+  resizeObserver.observe(content);
+  resizeObserver.observe(solutionContent);
+  resizeObserver.observe(navigation);
+  const pdf = getPdfBox();
+  if (pdf) resizeObserver.observe(pdf);
+
+  const navigationObserver = new MutationObserver(() => {
+    if (!container.isConnected || !content.isConnected) cleanupNavigation();
+    else scheduleNavigationUpdate();
+  });
+  navigationObserver.observe(document.body, { childList: true, subtree: true });
+
   function cleanupNavigation() {
     if (!navigationActive) return;
-
     navigationActive = false;
-    navigationEnabled = false;
-
-    window.removeEventListener(
-      'scroll',
-      scheduleNavigationUpdate
-    );
-
-    window.removeEventListener(
-      'resize',
-      scheduleNavigationUpdate
-    );
-
-    solutionDetails.removeEventListener(
-      'toggle',
-      onSolutionToggle
-    );
-
-    if (navigationFrame !== null) {
-      window.cancelAnimationFrame(navigationFrame);
-      navigationFrame = null;
-    }
-
-    if (navigationObserver) {
-      navigationObserver.disconnect();
-      navigationObserver = null;
-    }
-
-    navigationButton.remove();
-
+    window.removeEventListener('scroll', scheduleNavigationUpdate, true);
+    window.removeEventListener('resize', scheduleNavigationUpdate);
+    window.visualViewport?.removeEventListener('resize', scheduleNavigationUpdate);
+    window.visualViewport?.removeEventListener('scroll', scheduleNavigationUpdate);
+    solutionDetails.removeEventListener('toggle', onSolutionToggle);
+    if (navigationFrame !== null) window.cancelAnimationFrame(navigationFrame);
+    resizeObserver.disconnect();
+    navigationObserver.disconnect();
+    navigation.remove();
+    document.body.classList.remove('sat-navigation-active');
     if (container._satNavigationCleanup === cleanupNavigation) {
       container._satNavigationCleanup = null;
     }
-
     if (activeSatNavigationCleanup === cleanupNavigation) {
       activeSatNavigationCleanup = null;
     }
   }
 
-  solutionDetails.addEventListener(
-    'toggle',
-    onSolutionToggle
-  );
-
-  window.addEventListener(
-    'scroll',
-    scheduleNavigationUpdate,
-    { passive: true }
-  );
-
-  window.addEventListener(
-    'resize',
-    scheduleNavigationUpdate
-  );
-
-  navigationObserver = new MutationObserver(() => {
-    if (
-      !content.isConnected ||
-      !solutionDetails.isConnected ||
-      !container.isConnected
-    ) {
-      cleanupNavigation();
-    }
-  });
-
-  navigationObserver.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
+  window.addEventListener('scroll', scheduleNavigationUpdate, { passive: true, capture: true });
+  window.addEventListener('resize', scheduleNavigationUpdate);
+  window.visualViewport?.addEventListener('resize', scheduleNavigationUpdate);
+  window.visualViewport?.addEventListener('scroll', scheduleNavigationUpdate);
+  solutionDetails.addEventListener('toggle', onSolutionToggle);
   container._satNavigationCleanup = cleanupNavigation;
   activeSatNavigationCleanup = cleanupNavigation;
+  scheduleNavigationUpdate();
 
   const backButton = document.createElement('button');
   backButton.type = 'button';
@@ -923,7 +764,56 @@ export function renderSatQuestion(container, questionId) {
     existingBackButton?.click();
   });
 
-  container.append(backButton);
+  const bottomNavigation = document.createElement('div');
+  bottomNavigation.className = 'sat-question-bottom-navigation';
+  const adjacentNavigation = document.createElement('div');
+  adjacentNavigation.className = 'sat-question-adjacent-navigation';
+  const previousButton = document.createElement('button');
+  previousButton.type = 'button';
+  previousButton.textContent = 'Previous';
+  const nextButton = document.createElement('button');
+  nextButton.type = 'button';
+  nextButton.textContent = 'Next';
+  // Match the existing Back button without altering its styles or handler.
+  previousButton.style.cssText = backButton.style.cssText;
+  nextButton.style.cssText = backButton.style.cssText;
+  if (navigationHost) {
+    previousButton.style.marginTop = '0';
+    nextButton.style.marginTop = '0';
+  }
+  function navigateQuestion(direction) {
+    const next = getAdjacentSatQuestion(question, direction);
+    if (!next) return;
+    const questionPage = container.parentElement;
+    solutionDetails.open = false;
+    cleanupNavigation();
+    if (onQuestionNavigate) {
+      onQuestionNavigate(next);
+    } else {
+      renderSatQuestion(container, next.id);
+    }
+    const nextContent = questionPage.querySelector('.sat-question-content');
+    const nextHeading = questionPage.querySelector('.sat-question-number');
+    if (!nextContent || !nextHeading) return;
+    // Wait for math layout before aligning the new question below sticky links.
+    typesetMath(nextContent).then(() => {
+      window.requestAnimationFrame(() => {
+        if (!nextContent.isConnected || !nextHeading.isConnected) return;
+        nextHeading.tabIndex = -1;
+        nextHeading.focus({ preventScroll: true });
+        window.scrollTo({
+          top: Math.max(0, window.scrollY + nextHeading.getBoundingClientRect().top - getScrollOffset()),
+          behavior: 'instant'
+        });
+      });
+    });
+  }
+  previousButton.addEventListener('click', () => navigateQuestion(-1));
+  nextButton.addEventListener('click', () => navigateQuestion(1));
+  adjacentNavigation.append(previousButton, nextButton);
+  bottomNavigation.append(backButton);
+  (navigationHost || bottomNavigation).append(adjacentNavigation);
+  container.append(bottomNavigation);
 
   typesetMath(content);
 }

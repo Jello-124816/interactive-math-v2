@@ -16,7 +16,8 @@ export function renderSatQuestionPage({
   container,
   questionId,
   practiceId,
-  difficulty
+  difficulty,
+  onQuestionNavigate
 }) {
   const question = satQuestions.find(
     item =>
@@ -32,6 +33,7 @@ export function renderSatQuestionPage({
   container.replaceChildren();
 
   const heading = document.createElement('h2');
+  heading.className = 'sat-question-number';
   heading.textContent = question.number;
   heading.style.fontSize = 'clamp(24px, 3vw, 34px)';
   heading.style.marginBottom = '8px';
@@ -44,9 +46,12 @@ export function renderSatQuestionPage({
   const viewer = document.createElement('div');
   viewer.className = 'sat-question-viewer';
 
-  container.append(heading, type, viewer);
+  const headingRow = document.createElement('div');
+  headingRow.className = 'sat-question-heading-row';
+  headingRow.append(heading);
+  container.append(headingRow, type, viewer);
 
-  renderSatQuestion(viewer, questionId);
+  renderSatQuestion(viewer, questionId, { onQuestionNavigate, navigationHost: headingRow });
 
   return true;
 }

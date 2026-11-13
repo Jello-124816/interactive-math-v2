@@ -651,3 +651,109 @@
   color: #1d4ed8 !important;
   text-decoration: underline;
 }
+
+/* Dedicated SAT navigation space keeps buttons clear of text and PDF controls. */
+body.sat-navigation-active {
+  padding-bottom: calc(76px + env(safe-area-inset-bottom));
+}
+
+.sat-question-navigation {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 1000;
+  height: calc(64px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 8px max(16px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.sat-question-navigation button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #2563eb;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sat-question-navigation button[hidden] {
+  display: none;
+}
+
+.sat-question-navigation button:hover {
+  background: #eff6ff;
+}
+
+.sat-question-navigation button:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.sat-question-bottom-navigation {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sat-question-bottom-navigation > button {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sat-question-bottom-navigation button:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
+.sat-question-adjacent-navigation {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+  min-width: 0;
+}
+
+.sat-question-adjacent-navigation > button {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.sat-question-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.sat-question-heading-row .sat-question-number {
+  margin-bottom: 0 !important;
+}
+
+.sat-question-heading-row button:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .sat-question-heading-row .sat-question-adjacent-navigation {
+    gap: 8px;
+  }
+
+  .sat-question-heading-row .sat-question-adjacent-navigation > button {
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+    min-height: 44px;
+  }
+}

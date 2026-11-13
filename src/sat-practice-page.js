@@ -82,7 +82,12 @@ function renderQuestion() {
     container: practiceView,
     questionId: currentQuestion,
     practiceId: practice.id,
-    difficulty: currentDifficulty
+    difficulty: currentDifficulty,
+    onQuestionNavigate(next) {
+      currentDifficulty = next.difficulty;
+      currentQuestion = next.id;
+      renderQuestion();
+    }
   });
 
   if (!success) {
